@@ -7,28 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@700;800;900&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" />
-<script src="https://cdn.tailwindcss.com"></script>
-<!-- Kakao AdFit 로더 -->
-<script async src="//t1.kakaocdn.net/kas/static/ba.min.js"></script>
-<!-- Kakao Maps SDK: 아래 KAKAO_APP_KEY를 카카오 디벨로퍼스에서 발급받은 JavaScript 키로 교체 -->
-<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ec40f63117c49d0573bb85dfde85c99f&libraries=services&autoload=false"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          bg: "#F6F3EA", ink: "#20281F", accent: "#E8542E",
-          accent2: "#2F6F5E", kraft: "#D8CFB2", kraftdark: "#B9AE8C",
-        },
-        fontFamily: {
-          display: ["'Gothic A1'", "-apple-system", "sans-serif"],
-          body: ["'IBM Plex Sans KR'", "-apple-system", "sans-serif"],
-          mono: ["'IBM Plex Mono'", "monospace"],
-        },
-      },
-    },
-  };
-</script>
+<style>
+*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:IBM Plex Mono,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0}.bottom-2{bottom:.5rem}.right-2{right:.5rem}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.-mt-1{margin-top:-.25rem}.mb-1{margin-bottom:.25rem}.mb-4{margin-bottom:1rem}.ml-auto{margin-left:auto}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-1\.5{margin-top:.375rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.inline-block{display:inline-block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-1\.5{height:.375rem}.h-32{height:8rem}.h-40{height:10rem}.h-full{height:100%}.max-h-\[90vh\]{max-height:90vh}.min-h-\[120px\]{min-height:120px}.w-1\.5{width:.375rem}.w-28{width:7rem}.w-full{width:100%}.min-w-0{min-width:0}.max-w-2xl{max-width:42rem}.max-w-\[140px\]{max-width:140px}.max-w-\[220px\]{max-width:220px}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.items-baseline{align-items:baseline}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.self-end{align-self:flex-end}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis}.truncate,.whitespace-nowrap{white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-t{border-top-width:1px}.border-accent2{--tw-border-opacity:1;border-color:rgb(47 111 94/var(--tw-border-opacity,1))}.border-ink{--tw-border-opacity:1;border-color:rgb(32 40 31/var(--tw-border-opacity,1))}.border-kraft{--tw-border-opacity:1;border-color:rgb(216 207 178/var(--tw-border-opacity,1))}.border-white\/10{border-color:hsla(0,0%,100%,.1)}.bg-accent{--tw-bg-opacity:1;background-color:rgb(232 84 46/var(--tw-bg-opacity,1))}.bg-accent2{--tw-bg-opacity:1;background-color:rgb(47 111 94/var(--tw-bg-opacity,1))}.bg-bg{--tw-bg-opacity:1;background-color:rgb(246 243 234/var(--tw-bg-opacity,1))}.bg-black\/30{background-color:rgba(0,0,0,.3)}.bg-ink{--tw-bg-opacity:1;background-color:rgb(32 40 31/var(--tw-bg-opacity,1))}.bg-kraft{--tw-bg-opacity:1;background-color:rgb(216 207 178/var(--tw-bg-opacity,1))}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-white\/5{background-color:hsla(0,0%,100%,.05)}.object-cover{-o-object-fit:cover;object-fit:cover}.p-2\.5{padding:.625rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-16{padding-top:4rem;padding-bottom:4rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.pb-16{padding-bottom:4rem}.pb-7{padding-bottom:1.75rem}.pt-8{padding-top:2rem}.text-center{text-align:center}.text-right{text-align:right}.font-display{font-family:Gothic A1,-apple-system,sans-serif}.font-mono{font-family:IBM Plex Mono,monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-semibold{font-weight:600}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.tracking-wide{letter-spacing:.025em}.tracking-wider{letter-spacing:.05em}.text-\[\#6E6650\]{--tw-text-opacity:1;color:rgb(110 102 80/var(--tw-text-opacity,1))}.text-\[\#8A8064\]{--tw-text-opacity:1;color:rgb(138 128 100/var(--tw-text-opacity,1))}.text-\[\#B9AE8C\]{--tw-text-opacity:1;color:rgb(185 174 140/var(--tw-text-opacity,1))}.text-accent{--tw-text-opacity:1;color:rgb(232 84 46/var(--tw-text-opacity,1))}.text-accent2{--tw-text-opacity:1;color:rgb(47 111 94/var(--tw-text-opacity,1))}.text-ink{--tw-text-opacity:1;color:rgb(32 40 31/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.text-white\/60{color:hsla(0,0%,100%,.6)}.text-white\/70{color:hsla(0,0%,100%,.7)}.text-white\/80{color:hsla(0,0%,100%,.8)}.underline{text-decoration-line:underline}.decoration-dotted{text-decoration-style:dotted}.opacity-50{opacity:.5}.shadow-sm{--tw-shadow:0 1px 2px 0 rgba(0,0,0,.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.outline{outline-style:solid}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.hover\:text-accent:hover{--tw-text-opacity:1;color:rgb(232 84 46/var(--tw-text-opacity,1))}.hover\:brightness-110:hover{--tw-brightness:brightness(1.1);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}@media (min-width:640px){.sm\:block{display:block}}
+</style>
 <style>
   /* IBM Plex Mono엔 한글 글리프가 없으므로, 이 폰트는 숫자·쉼표 등 라틴 문자에만 적용할 것.
      한글이 섞인 문자열에 적용하면 브라우저가 시스템 기본 한글 폰트로 조용히 대체된다. */
@@ -128,7 +109,10 @@
       <label class="flex flex-col gap-1">
         <span class="text-[11px] font-semibold text-[#6E6650]">상품 사진 (선택)</span>
         <input id="f_photo" type="file" accept="image/*" class="input" style="padding: 6px 12px;" />
-        <img id="f_photoPreview" class="hidden mt-1 rounded-lg w-full h-32 object-cover" style="border:1.5px solid #D8CFB2;" />
+        <div class="relative">
+          <img id="f_photoPreview" class="hidden mt-1 rounded-lg w-full h-32 object-cover" style="border:1.5px solid #D8CFB2;" />
+          <button type="button" id="f_photoRemoveBtn" class="hidden mt-1 text-[11px] text-accent underline decoration-dotted">사진 제거</button>
+        </div>
         <p id="f_photoStatus" class="text-[11px] text-[#8A8064] hidden"></p>
       </label>
       <div class="flex gap-3">
@@ -288,6 +272,7 @@ el("#closeFormBtn").addEventListener("click", closeForm);
 function closeForm() {
   el("#formModal").classList.add("hidden"); el("#formModal").classList.remove("flex");
   el("#formError").classList.add("hidden");
+  resetPhotoState();
 }
 
 function renderViewToggle() {
@@ -347,6 +332,21 @@ if (firebaseReady) {
   el("#feedStatus").textContent = "Firebase 설정이 비어 있어요. index.html 안의 firebaseConfig를 채워주세요.";
 }
 
+function resetPhotoState() {
+  formPhotoUrl = null;
+  formPhotoUploading = false;
+  el("#f_photo").value = "";
+  el("#f_photoPreview").classList.add("hidden");
+  el("#f_photoPreview").removeAttribute("src");
+  el("#f_photoRemoveBtn").classList.add("hidden");
+  el("#f_photoStatus").classList.add("hidden");
+}
+
+// 같은 파일을 다시 선택해도 change 이벤트가 확실히 발생하도록, 선택창을 열기 전 값 초기화
+el("#f_photo").addEventListener("click", (e) => { e.target.value = ""; });
+
+el("#f_photoRemoveBtn").addEventListener("click", resetPhotoState);
+
 el("#f_photo").addEventListener("change", async (e) => {
   const file = e.target.files[0];
   const statusEl = el("#f_photoStatus");
@@ -355,6 +355,8 @@ el("#f_photo").addEventListener("change", async (e) => {
 
   previewEl.src = URL.createObjectURL(file);
   previewEl.classList.remove("hidden");
+  el("#f_photoRemoveBtn").classList.remove("hidden");
+  formPhotoUrl = null;
 
   if (IMGBB_API_KEY === "IMGBB_API_KEY") {
     statusEl.textContent = "사진 업로드 기능이 아직 설정되지 않았어요 (IMGBB_API_KEY 필요) — 사진 없이도 등록은 가능해요.";
@@ -379,13 +381,13 @@ el("#f_photo").addEventListener("change", async (e) => {
     const json = await res.json();
     if (json.success) {
       formPhotoUrl = json.data.url;
-      statusEl.textContent = "업로드 완료";
+      statusEl.textContent = "업로드 완료 · 다른 사진으로 바꾸려면 다시 선택하세요";
     } else {
       throw new Error("upload failed");
     }
   } catch (err) {
     console.error(err);
-    statusEl.textContent = "업로드 실패했어요. 사진 없이 등록하거나 다시 시도해주세요.";
+    statusEl.textContent = "업로드 실패했어요. 다시 선택하거나 사진 없이 등록해주세요.";
     formPhotoUrl = null;
   } finally {
     formPhotoUploading = false;
@@ -425,12 +427,9 @@ el("#submitFormBtn").addEventListener("click", async () => {
   joinedIds.add(ref.id);
   selectedTags = [];
   formLocation = null;
-  formPhotoUrl = null;
   el("#f_locSearch").value = "";
   el("#f_locResult").classList.add("hidden");
   el("#f_map").classList.add("hidden");
-  el("#f_photoPreview").classList.add("hidden");
-  el("#f_photoStatus").classList.add("hidden");
   document.querySelectorAll(".tag-pick").forEach((b) => b.className = "tag-pick text-xs font-semibold px-2.5 py-1 rounded-full border border-kraft bg-white");
   document.querySelectorAll("#formFields input, #formFields select").forEach((i) => i.value = "");
   closeForm();
@@ -662,8 +661,9 @@ function dealCard(d) {
     </div>`;
 
   return `
-  <div class="rounded-2xl p-5 flex flex-col gap-3 bg-white border border-kraft shadow-sm ${completed ? "card-stripe-completed" : matched ? "card-stripe-matched" : "card-stripe-open"}">
-    ${d.photoUrl ? `<img src="${d.photoUrl}" class="w-full h-40 object-cover rounded-xl -mt-1" style="border:1px solid #D8CFB2;" alt="${d.product}" />` : ""}
+  <div class="rounded-2xl flex flex-col bg-white border border-kraft shadow-sm overflow-hidden ${completed ? "card-stripe-completed" : matched ? "card-stripe-matched" : "card-stripe-open"}">
+    ${d.photoUrl ? `<img src="${d.photoUrl}" class="w-full object-cover" style="aspect-ratio: 4/3;" alt="${d.product}" />` : ""}
+    <div class="p-5 flex flex-col gap-3">
     <div class="flex items-start justify-between gap-2">
       <div class="min-w-0">
         ${d.store ? `<p class="text-[11px] font-semibold mb-1 text-accent2 tracking-wide truncate">${d.store}</p>` : ""}
@@ -695,6 +695,7 @@ function dealCard(d) {
     ${ctaBlock}
 
     <button class="report-btn text-[10px] text-[#B9AE8C] hover:text-accent self-end underline decoration-dotted" data-id="${d.id}">신고하기</button>
+    </div>
   </div>`;
 }
 
