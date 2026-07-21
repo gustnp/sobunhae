@@ -63,6 +63,21 @@
     <p>신고 누적, 상태 관리, 삭제 — 이 페이지 주소는 외부에 공유하지 마세요.</p>
   </header>
   <main>
+    <section style="background:#fff; border:1.5px solid #D8CFB2; border-radius:12px; padding:16px; margin-bottom:20px;">
+      <p style="font-weight:800; font-size:14px; margin:0 0 4px;">상단 배너 관리</p>
+      <p style="font-size:11px; color:#8A8064; margin:0 0 10px;">권장 사이즈 1200×600px (2:1 비율) · 배너를 올리면 홈 상단의 실시간 캐러셀 대신 이 이미지가 표시돼요. 지우면 다시 캐러셀로 돌아가요.</p>
+      <div id="bannerPreviewWrap" style="display:none; margin-bottom:10px;">
+        <img id="bannerPreview" style="width:100%; max-width:400px; aspect-ratio:2/1; object-fit:cover; border-radius:8px; border:1.5px solid #D8CFB2;" />
+      </div>
+      <input id="bannerFile" type="file" accept="image/*" style="font-size:13px; margin-bottom:8px;" />
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <input id="bannerLink" type="text" placeholder="클릭 시 이동할 링크 (선택)" style="flex:1; min-width:180px;" />
+        <button id="bannerUploadBtn">배너 저장</button>
+        <button id="bannerRemoveBtn" class="ghost">배너 제거</button>
+      </div>
+      <p id="bannerStatus" style="font-size:11px; color:#8A8064; margin-top:6px;"></p>
+    </section>
+
     <div class="toolbar">
       <select id="sortSelect">
         <option value="reports">신고 많은 순</option>
@@ -84,7 +99,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy,
+  getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, setDoc, getDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // 비밀번호를 반드시 바꿔주세요. 이건 실제 보안이 아니라 최소한의 접근 차단입니다.
@@ -128,7 +143,60 @@ function initFirebase() {
   }, (err) => {
     el("#list").innerHTML = `<p style="color:#E8542E;">불러오기 실패: ${err.message}</p>`;
   });
+
+  onSnapshot(doc(db, "config", "banner"), (snap) => {
+    if (snap.exists()) {
+      const data = snap.data();
+      el("#bannerPreview").src = data.imageUrl;
+      el("#bannerPreviewWrap").style.display = "block";
+      el("#bannerLink").value = data.link || "";
+    } else {
+      el("#bannerPreviewWrap").style.display = "none";
+      el("#bannerLink").value = "";
+    }
+  });
 }
+
+const IMGBB_API_KEY = "b481d876c33f3e939320034188b6702d";
+let bannerFile = null;
+el("#bannerFile").addEventListener("change", (e) => { bannerFile = e.target.files[0] || null; });
+
+el("#bannerUploadBtn").addEventListener("click", async () => {
+  const statusEl = el("#bannerStatus");
+  if (!bannerFile) {
+    statusEl.textContent = "먼저 이미지를 선택해주세요.";
+    return;
+  }
+  statusEl.textContent = "업로드 중...";
+  try {
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(",")[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(bannerFile);
+    });
+    const body = new FormData();
+    body.append("image", base64);
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body });
+    const json = await res.json();
+    if (!json.success) throw new Error("upload failed");
+    await setDoc(doc(db, "config", "banner"), {
+      imageUrl: json.data.url, link: el("#bannerLink").value.trim(), updatedAt: Date.now(),
+    });
+    statusEl.textContent = "배너가 저장됐어요.";
+    bannerFile = null;
+    el("#bannerFile").value = "";
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "업로드 실패했어요. 다시 시도해주세요.";
+  }
+});
+
+el("#bannerRemoveBtn").addEventListener("click", async () => {
+  if (!confirm("배너를 제거할까요? 홈 화면은 다시 실시간 캐러셀로 돌아가요.")) return;
+  await deleteDoc(doc(db, "config", "banner"));
+  el("#bannerStatus").textContent = "배너를 제거했어요.";
+});
 
 el("#sortSelect").addEventListener("change", (e) => { sortMode = e.target.value; render(); });
 el("#statusFilterSelect").addEventListener("change", (e) => { statusFilter = e.target.value; render(); });
