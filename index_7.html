@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>소분해 · 코스트코 소분 나눔</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@700;800;900&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" />
+<!-- Kakao AdFit 로더 -->
+<script async src="//t1.kakaocdn.net/kas/static/ba.min.js"></script>
+<!-- Kakao Maps SDK: 아래 KAKAO_APP_KEY를 카카오 디벨로퍼스에서 발급받은 JavaScript 키로 교체 -->
+<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ec40f63117c49d0573bb85dfde85c99f&libraries=services&autoload=false"></script>
+<style>
+*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:IBM Plex Mono,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0}.bottom-2{bottom:.5rem}.right-2{right:.5rem}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.-mt-1{margin-top:-.25rem}.mb-1{margin-bottom:.25rem}.mb-4{margin-bottom:1rem}.ml-auto{margin-left:auto}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-1\.5{margin-top:.375rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.inline-block{display:inline-block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-1\.5{height:.375rem}.h-32{height:8rem}.h-40{height:10rem}.h-full{height:100%}.max-h-\[90vh\]{max-height:90vh}.min-h-\[120px\]{min-height:120px}.w-1\.5{width:.375rem}.w-28{width:7rem}.w-full{width:100%}.min-w-0{min-width:0}.max-w-2xl{max-width:42rem}.max-w-\[140px\]{max-width:140px}.max-w-\[220px\]{max-width:220px}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.items-baseline{align-items:baseline}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.self-end{align-self:flex-end}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis}.truncate,.whitespace-nowrap{white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.border{border-width:1px}.border-t{border-top-width:1px}.border-accent2{--tw-border-opacity:1;border-color:rgb(47 111 94/var(--tw-border-opacity,1))}.border-ink{--tw-border-opacity:1;border-color:rgb(32 40 31/var(--tw-border-opacity,1))}.border-kraft{--tw-border-opacity:1;border-color:rgb(216 207 178/var(--tw-border-opacity,1))}.border-white\/10{border-color:hsla(0,0%,100%,.1)}.bg-accent{--tw-bg-opacity:1;background-color:rgb(232 84 46/var(--tw-bg-opacity,1))}.bg-accent2{--tw-bg-opacity:1;background-color:rgb(47 111 94/var(--tw-bg-opacity,1))}.bg-bg{--tw-bg-opacity:1;background-color:rgb(246 243 234/var(--tw-bg-opacity,1))}.bg-black\/30{background-color:rgba(0,0,0,.3)}.bg-ink{--tw-bg-opacity:1;background-color:rgb(32 40 31/var(--tw-bg-opacity,1))}.bg-kraft{--tw-bg-opacity:1;background-color:rgb(216 207 178/var(--tw-bg-opacity,1))}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-white\/5{background-color:hsla(0,0%,100%,.05)}.object-cover{-o-object-fit:cover;object-fit:cover}.p-2\.5{padding:.625rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-16{padding-top:4rem;padding-bottom:4rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.pb-16{padding-bottom:4rem}.pb-7{padding-bottom:1.75rem}.pt-8{padding-top:2rem}.text-center{text-align:center}.text-right{text-align:right}.font-display{font-family:Gothic A1,-apple-system,sans-serif}.font-mono{font-family:IBM Plex Mono,monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-semibold{font-weight:600}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.tracking-wide{letter-spacing:.025em}.tracking-wider{letter-spacing:.05em}.text-\[\#6E6650\]{--tw-text-opacity:1;color:rgb(110 102 80/var(--tw-text-opacity,1))}.text-\[\#8A8064\]{--tw-text-opacity:1;color:rgb(138 128 100/var(--tw-text-opacity,1))}.text-\[\#B9AE8C\]{--tw-text-opacity:1;color:rgb(185 174 140/var(--tw-text-opacity,1))}.text-accent{--tw-text-opacity:1;color:rgb(232 84 46/var(--tw-text-opacity,1))}.text-accent2{--tw-text-opacity:1;color:rgb(47 111 94/var(--tw-text-opacity,1))}.text-ink{--tw-text-opacity:1;color:rgb(32 40 31/var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.text-white\/60{color:hsla(0,0%,100%,.6)}.text-white\/70{color:hsla(0,0%,100%,.7)}.text-white\/80{color:hsla(0,0%,100%,.8)}.underline{text-decoration-line:underline}.decoration-dotted{text-decoration-style:dotted}.opacity-50{opacity:.5}.shadow-sm{--tw-shadow:0 1px 2px 0 rgba(0,0,0,.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.outline{outline-style:solid}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.hover\:text-accent:hover{--tw-text-opacity:1;color:rgb(232 84 46/var(--tw-text-opacity,1))}.hover\:brightness-110:hover{--tw-brightness:brightness(1.1);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}@media (min-width:640px){.sm\:block{display:block}}
+</style>
+<style>
+  /* IBM Plex Mono엔 한글 글리프가 없으므로, 이 폰트는 숫자·쉼표 등 라틴 문자에만 적용할 것.
+     한글이 섞인 문자열에 적용하면 브라우저가 시스템 기본 한글 폰트로 조용히 대체된다. */
+  body { background: #F6F3EA; font-family: 'IBM Plex Sans KR', -apple-system, sans-serif; }
+  .division-seg { flex: 1; height: 14px; border-radius: 3px; border: 1.5px solid #B9AE8C; transition: background 200ms ease; }
+  .division-seg.filled { background: #E8542E; border-color: transparent; }
+  .division-seg.filled.matched { background: #2F6F5E; }
+  .ad-sticker { transform: rotate(-1.4deg); }
+  .card-stripe-open { border-left: 6px solid #E8542E; }
+  .card-stripe-matched { border-left: 6px solid #2F6F5E; }
+  .card-stripe-completed { border-left: 6px solid #8A8064; }
+  ::-webkit-scrollbar { width: 8px; }
+  a, button { -webkit-tap-highlight-color: transparent; }
+</style>
+</head>
+<body class="pb-16">
+
+<!-- 헤더: 진한 배경으로 크롬 영역과 콘텐츠 영역을 명확히 분리 -->
+<header class="bg-ink text-white px-5 pt-8 pb-7">
+  <div class="max-w-2xl mx-auto">
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+      <div>
+        <p class="text-[11px] font-bold tracking-wider text-accent2">COSTCO 소분 나눔</p>
+        <h1 class="text-3xl font-display font-black mt-1">소분해</h1>
+      </div>
+      <button id="openFormBtn"
+        class="flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-bold bg-accent hover:brightness-110 transition">
+        <span class="text-lg leading-none">+</span> 소분 올리기
+      </button>
+    </div>
+    <p class="text-sm mt-3 text-white/70">대용량은 나누면 부담이 줄어요. 우리 동네 사람과 코스트코 물건을 소분해요.</p>
+
+    <!-- 관리자가 올린 배너 (있으면 아래 캐러셀 대신 표시) -->
+    <a id="heroBannerLink" href="#" target="_blank" rel="noreferrer" class="mt-5 rounded-2xl overflow-hidden border border-white/10" style="display:none;">
+      <img id="heroBannerImg" class="w-full object-cover" style="aspect-ratio: 2/1; display:block;" alt="배너" />
+    </a>
+
+    <!-- 시그니처: 실시간 모집중 캐러셀 (배너 없을 때 기본으로 표시) -->
+    <div id="heroCarousel" class="mt-5 rounded-2xl p-4 flex items-center gap-4 bg-white/5 border border-white/10 relative overflow-hidden" style="min-height: 76px;">
+      <span class="text-2xl">📦</span>
+      <div id="heroSlide" class="flex-1 min-w-0">
+        <p class="text-xs font-semibold text-white">로티세리 치킨 2팩 · 24,000원 · 4명 모집</p>
+        <div class="mt-1.5 max-w-[220px] flex gap-1">
+          <div class="division-seg filled"></div><div class="division-seg filled"></div>
+          <div class="division-seg"></div><div class="division-seg"></div>
+        </div>
+      </div>
+      <p class="text-xs text-right text-white/60 max-w-[140px] hidden sm:block">목표 인원이 다 모이면<br />채팅방이 열려요</p>
+      <span id="heroCounter" class="absolute bottom-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/30 text-white/80 hidden"></span>
+    </div>
+  </div>
+</header>
+
+<!-- 필터바 -->
+<div class="max-w-2xl mx-auto px-5 mt-5 flex flex-wrap items-center gap-2">
+  <div class="flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-white border border-kraft">
+    <span class="text-accent2 text-sm">📍</span>
+    <input id="locFilter" placeholder="동 이름으로 찾기" class="text-sm outline-none w-28 bg-transparent" />
+  </div>
+  <div id="statusChips" class="flex gap-2"></div>
+  <select id="tagFilter" class="text-xs font-semibold rounded-full px-3 py-1.5 bg-white border border-kraft"></select>
+  <div id="viewToggle" class="flex rounded-full border border-kraft overflow-hidden">
+    <button data-view="list" class="view-btn text-xs font-semibold px-3 py-1.5">목록</button>
+    <button data-view="map" class="view-btn text-xs font-semibold px-3 py-1.5">지도</button>
+  </div>
+  <span id="syncIndicator" class="ml-auto flex items-center gap-1.5 text-xs font-semibold text-[#6E6650]">
+    <span class="w-1.5 h-1.5 rounded-full bg-accent2 animate-pulse"></span> 실시간 연동 중
+  </span>
+</div>
+
+<!-- 피드 -->
+<main class="max-w-2xl mx-auto px-5 mt-5">
+  <div id="feedStatus" class="text-sm text-center py-16 text-[#8A8064]">불러오는 중...</div>
+  <div id="feed" class="grid gap-4"></div>
+  <div id="mapView" class="hidden rounded-2xl overflow-hidden border border-kraft" style="height: 460px;"></div>
+</main>
+
+<footer class="max-w-2xl mx-auto px-5 py-6 mt-4 border-t border-kraft">
+  <p class="text-[11px] text-[#8A8064] leading-relaxed">
+    소분해는 참여자 간 거래를 중개할 뿐, 거래 당사자가 아니며 상품·정산·전달 과정에서 발생하는 분쟁에 대해 책임지지 않습니다.
+    거래는 참여자 본인의 판단과 책임 하에 이뤄지며, 문제가 있는 게시글은 각 카드의 "신고하기"를 통해 알려주세요.
+  </p>
+</footer>
+
+<!-- 새 소분 등록 모달 -->
+<div id="formModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(32,40,31,0.45)">
+  <div class="w-full max-w-md rounded-2xl p-6 max-h-[90vh] overflow-y-auto bg-white">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-extrabold text-ink">새 소분 올리기</h2>
+      <button id="closeFormBtn" class="text-[#8A8064] text-xl leading-none">&times;</button>
+    </div>
+    <div class="flex flex-col gap-3" id="formFields">
+      <label class="flex flex-col gap-1">
+        <span class="text-[11px] font-semibold text-[#6E6650]">상품명 *</span>
+        <input id="f_product" list="productSuggestions" placeholder="예: 커클랜드 로티세리 치킨 2팩" class="input" />
+        <datalist id="productSuggestions"></datalist>
+      </label>
+      <label class="flex flex-col gap-1">
+        <span class="text-[11px] font-semibold text-[#6E6650]">매장 (선택)</span>
+        <input id="f_store" placeholder="예: 코스트코 양재점" class="input" />
+      </label>
+      <label class="flex flex-col gap-1">
+        <span class="text-[11px] font-semibold text-[#6E6650]">상품 사진 (선택)</span>
+        <input id="f_photo" type="file" accept="image/*" class="input" style="padding: 6px 12px;" />
+        <div class="relative">
+          <img id="f_photoPreview" class="hidden mt-1 rounded-lg w-full h-32 object-cover" style="border:1.5px solid #D8CFB2;" />
+          <button type="button" id="f_photoRemoveBtn" class="hidden mt-1 text-[11px] text-accent underline decoration-dotted">사진 제거</button>
+        </div>
+        <p id="f_photoStatus" class="text-[11px] text-[#8A8064] hidden"></p>
+      </label>
+      <div class="flex gap-3">
+        <label class="flex flex-col gap-1 flex-1">
+          <span class="text-[11px] font-semibold text-[#6E6650]">총 가격(원) *</span>
+          <input id="f_price" type="number" placeholder="24000" class="input" />
+        </label>
+        <label class="flex flex-col gap-1 flex-1">
+          <span class="text-[11px] font-semibold text-[#6E6650]">목표 인원 *</span>
+          <select id="f_target" class="input">
+            <option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>8</option>
+          </select>
+        </label>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-[11px] font-semibold text-[#6E6650]">위치 *</span>
+        <div class="flex gap-2">
+          <input id="f_locSearch" placeholder="예: 정자동 카페거리, 서초구청" class="input flex-1" />
+          <button type="button" id="f_locSearchBtn" class="rounded-lg px-3 text-sm font-bold bg-ink text-white whitespace-nowrap">검색</button>
+        </div>
+        <div id="f_map" class="w-full h-40 rounded-lg mt-1 hidden"></div>
+        <p id="f_locResult" class="text-xs text-accent2 hidden"></p>
+        <p id="f_locError" class="text-xs text-accent hidden"></p>
+        <p class="text-[10px] text-[#8A8064]">검색 후 지도 위 마커를 드래그하면 위치를 세밀하게 조정할 수 있어요.</p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-[11px] font-semibold text-[#6E6650]">태그 (선택, 여러 개 가능)</span>
+        <div id="f_tags" class="flex flex-wrap gap-1.5"></div>
+      </div>
+      <label class="flex flex-col gap-1">
+        <span class="text-[11px] font-semibold text-[#6E6650]">전달 방식</span>
+        <select id="f_meet" class="input">
+          <option>직접 만나서 전달</option><option>택배로 소분 발송</option><option>협의 후 결정</option>
+        </select>
+      </label>
+      <label class="flex flex-col gap-1">
+        <span class="text-[11px] font-semibold text-[#6E6650]">채팅방 링크 (모집 완료 후 공개, 선택)</span>
+        <input id="f_contact" placeholder="오픈채팅 URL" class="input" />
+      </label>
+      <label class="flex flex-col gap-1">
+        <span class="text-[11px] font-semibold text-[#6E6650]">내 닉네임 *</span>
+        <input id="f_nickname" placeholder="이 글에서 쓸 닉네임" class="input" />
+      </label>
+    </div>
+    <div class="p-2.5 mt-3 flex items-start gap-2 bg-white" style="border-left: 4px solid #E8542E;">
+      <p class="text-[11px] text-[#6E6650] leading-relaxed"><span class="font-bold text-accent">전액 선입금 주의</span> — 실물을 직접 확인한 뒤 정산하는 걸 권장해요. 소분해는 참여자 간 거래에 관여하지 않아요.</p>
+    </div>
+    <p id="formError" class="text-xs mt-3 text-accent hidden"></p>
+    <p class="text-[11px] mt-3 text-[#8A8064]">여기에 올리는 글은 이 페이지를 보는 모든 사람에게 공개돼요.</p>
+    <button id="submitFormBtn" class="w-full mt-4 rounded-xl py-3 text-sm font-bold bg-ink text-white">등록하기</button>
+  </div>
+</div>
+
+<style>
+  .input { border: 1.5px solid #D8CFB2; border-radius: 10px; padding: 8px 12px; font-size: 14px; outline: none; color: #20281F; width: 100%; }
+  #f_map { border: 1.5px solid #D8CFB2; }
+</style>
+
+<!-- ================= Firebase 연동 =================
+  1) https://console.firebase.google.com 에서 무료 프로젝트 생성
+  2) Firestore Database 생성 (테스트 모드로 시작 — 30일 후 규칙 다시 설정 필요)
+  3) 프로젝트 설정 > 일반 > 웹 앱 추가 후 아래 firebaseConfig를 발급받은 값으로 교체
+================================================== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+import {
+  getFirestore, collection, addDoc, onSnapshot, doc, runTransaction,
+  updateDoc, increment, query, orderBy, getDocs, serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBDmMnZeSK9k6RMfU0uIRDQ8Hbj-HLhYL8",
+  authDomain: "sobunhae.firebaseapp.com",
+  projectId: "sobunhae",
+  storageBucket: "sobunhae.firebasestorage.app",
+  messagingSenderId: "1076905142580",
+  appId: "1:1076905142580:web:2ae1f34f7f822b32435d61",
+  measurementId: "G-81F2RNVDHL",
+};
+
+// ImgBB(무료 이미지 호스팅) API 키 — api.imgbb.com 에서 발급 (신용카드 불필요)
+const IMGBB_API_KEY = "b481d876c33f3e939320034188b6702d";
+
+const TAGS = ["신선/냉동", "간식/과자", "생활용품", "유아/키즈", "건강/영양", "반려동물", "주방/가전", "기타"];
+const won = (n) => `${Math.round(n).toLocaleString("ko-KR")}원`;
+const wonNum = (n) => Math.round(n).toLocaleString("ko-KR");
+const daysSince = (ts) => Math.floor((Date.now() - (ts?.toMillis?.() ?? ts ?? Date.now())) / 86400000);
+const el = (sel) => document.querySelector(sel);
+
+let app, db, analytics, deals = [];
+let firebaseReady = false;
+let statusFilter = "all", tagFilter = "all", joinedIds = new Set();
+let selectedTags = [];
+let currentView = "list";
+let heroIndex = 0;
+let heroTimer = null;
+let formLocation = null; // { name, lat, lng }
+let formPhotoUrl = null;
+let formPhotoUploading = false;
+
+let kakaoReady = false;
+let formMap, formMarker, formGeocoder;
+let feedMap, feedMarkers = [];
+
+if (window.kakao && window.kakao.maps) {
+  window.kakao.maps.load(() => { kakaoReady = true; });
+} else {
+  console.warn("카카오맵 SDK를 불러오지 못했어요. KAKAO_APP_KEY와 도메인 등록을 확인해주세요.");
+}
+
+try {
+  app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  analytics = getAnalytics(app); // 방문자/이용 통계 — Firebase 콘솔 > Analytics 에서 확인
+  firebaseReady = true;
+} catch (e) {
+  console.error("Firebase 초기화 실패:", e);
+}
+
+/* ---------- UI 초기 세팅 ---------- */
+el("#statusChips").innerHTML = [
+  ["all", "전체"], ["open", "모집중"], ["matched", "모집완료"], ["completed", "거래완료"],
+].map(([k, label]) => `<button data-status="${k}" class="status-chip text-xs font-semibold rounded-full px-3 py-1.5 border border-kraft bg-white">${label}</button>`).join("");
+
+el("#tagFilter").innerHTML = `<option value="all">태그 전체</option>` + TAGS.map((t) => `<option value="${t}">#${t}</option>`).join("");
+
+el("#f_tags").innerHTML = TAGS.map((t) =>
+  `<button type="button" data-tag="${t}" class="tag-pick text-xs font-semibold px-2.5 py-1 rounded-full border border-kraft">#${t}</button>`
+).join("");
+
+function renderStatusChips() {
+  document.querySelectorAll(".status-chip").forEach((b) => {
+    const on = b.dataset.status === statusFilter;
+    b.className = `status-chip text-xs font-semibold rounded-full px-3 py-1.5 border ${on ? "bg-ink text-white border-ink" : "bg-white text-ink border-kraft"}`;
+  });
+}
+renderStatusChips();
+
+document.querySelectorAll(".status-chip").forEach((b) => b.addEventListener("click", () => {
+  statusFilter = b.dataset.status; renderStatusChips(); render();
+}));
+el("#tagFilter").addEventListener("change", (e) => { tagFilter = e.target.value; render(); });
+el("#locFilter").addEventListener("input", render);
+
+document.querySelectorAll(".tag-pick").forEach((b) => b.addEventListener("click", () => {
+  const t = b.dataset.tag;
+  selectedTags = selectedTags.includes(t) ? selectedTags.filter((x) => x !== t) : [...selectedTags, t];
+  document.querySelectorAll(".tag-pick").forEach((btn) => {
+    const on = selectedTags.includes(btn.dataset.tag);
+    btn.className = `tag-pick text-xs font-semibold px-2.5 py-1 rounded-full border ${on ? "bg-accent2 text-white border-accent2" : "bg-white text-ink border-kraft"}`;
+  });
+}));
+
+el("#openFormBtn").addEventListener("click", () => {
+  el("#formModal").classList.remove("hidden"); el("#formModal").classList.add("flex");
+  el("#f_locError").classList.add("hidden");
+});
+el("#closeFormBtn").addEventListener("click", closeForm);
+function closeForm() {
+  el("#formModal").classList.add("hidden"); el("#formModal").classList.remove("flex");
+  el("#formError").classList.add("hidden");
+  resetPhotoState();
+}
+
+function renderViewToggle() {
+  document.querySelectorAll(".view-btn").forEach((b) => {
+    const on = b.dataset.view === currentView;
+    b.className = `view-btn text-xs font-semibold px-3 py-1.5 ${on ? "bg-ink text-white" : "bg-white text-ink"}`;
+  });
+}
+renderViewToggle();
+document.querySelectorAll(".view-btn").forEach((b) => b.addEventListener("click", () => {
+  currentView = b.dataset.view;
+  renderViewToggle();
+  render();
+}));
+
+/* ---------- 데이터 계층 ---------- */
+// location은 { name, lat, lng } 구조. 예전 데이터(순수 문자열)도 있을 수 있어 locOf()로 정규화.
+function locOf(d) {
+  if (d.location && typeof d.location === "object") return d.location;
+  return { name: d.location || "위치 미상", lat: null, lng: null };
+}
+
+const SEED = [
+  { product: "커클랜드 로티세리 치킨 2팩", store: "코스트코 양재점", totalPrice: 24000, targetCount: 4,
+    location: { name: "서초동", lat: 37.4837, lng: 127.0324 }, tags: ["신선/냉동"], meetMethod: "직접 만나서 전달", contactLink: "",
+    participants: [{ nickname: "닭좋아" }, { nickname: "치킨러버" }], status: "open",
+    createdAt: Date.now() - 2400000, priceCheckedAt: Date.now() - 2400000, priceConfirmations: 1 },
+  { product: "커클랜드 냉동 블루베리 2.5kg", store: "코스트코 상봉점", totalPrice: 18900, targetCount: 2,
+    location: { name: "중화동", lat: 37.6035, lng: 127.0762 }, tags: ["신선/냉동", "건강/영양"], meetMethod: "택배로 소분 발송", contactLink: "",
+    participants: [{ nickname: "베리굿" }, { nickname: "아침스무디" }], status: "matched",
+    createdAt: Date.now() - 18000000, priceCheckedAt: Date.now() - 777600000, priceConfirmations: 1 },
+];
+
+async function seedIfEmpty() {
+  const snap = await getDocs(collection(db, "deals"));
+  if (snap.empty) {
+    for (const d of SEED) await addDoc(collection(db, "deals"), d);
+  }
+}
+
+function startListening() {
+  const q = query(collection(db, "deals"), orderBy("createdAt", "desc"));
+  onSnapshot(q, (snap) => {
+    deals = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    render();
+  }, (err) => {
+    console.error(err);
+    el("#feedStatus").textContent = "목록을 불러오지 못했어요. Firebase 설정을 확인해주세요.";
+    el("#feedStatus").classList.remove("hidden");
+    el("#feed").innerHTML = "";
+  });
+}
+
+if (firebaseReady) {
+  seedIfEmpty().finally(startListening);
+  onSnapshot(doc(db, "config", "banner"), (snap) => {
+    const linkEl = el("#heroBannerLink");
+    const carouselEl = el("#heroCarousel");
+    if (snap.exists()) {
+      const data = snap.data();
+      el("#heroBannerImg").src = data.imageUrl;
+      linkEl.href = data.link || "#";
+      linkEl.style.display = "block";
+      carouselEl.style.display = "none";
+    } else {
+      linkEl.style.display = "none";
+      carouselEl.style.display = "flex";
+    }
+  }, () => { /* 배너 설정이 없으면 그냥 캐러셀 유지 */ });
+} else {
+  el("#feedStatus").textContent = "Firebase 설정이 비어 있어요. index.html 안의 firebaseConfig를 채워주세요.";
+}
+
+function resetPhotoState() {
+  formPhotoUrl = null;
+  formPhotoUploading = false;
+  el("#f_photo").value = "";
+  el("#f_photoPreview").classList.add("hidden");
+  el("#f_photoPreview").removeAttribute("src");
+  el("#f_photoRemoveBtn").classList.add("hidden");
+  el("#f_photoStatus").classList.add("hidden");
+}
+
+// 같은 파일을 다시 선택해도 change 이벤트가 확실히 발생하도록, 선택창을 열기 전 값 초기화
+el("#f_photo").addEventListener("click", (e) => { e.target.value = ""; });
+
+el("#f_photoRemoveBtn").addEventListener("click", resetPhotoState);
+
+el("#f_photo").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  const statusEl = el("#f_photoStatus");
+  const previewEl = el("#f_photoPreview");
+  if (!file) return;
+
+  previewEl.src = URL.createObjectURL(file);
+  previewEl.classList.remove("hidden");
+  el("#f_photoRemoveBtn").classList.remove("hidden");
+  formPhotoUrl = null;
+
+  if (IMGBB_API_KEY === "IMGBB_API_KEY") {
+    statusEl.textContent = "사진 업로드 기능이 아직 설정되지 않았어요 (IMGBB_API_KEY 필요) — 사진 없이도 등록은 가능해요.";
+    statusEl.classList.remove("hidden");
+    return;
+  }
+
+  formPhotoUploading = true;
+  statusEl.textContent = "업로드 중...";
+  statusEl.classList.remove("hidden");
+
+  try {
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(",")[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    const body = new FormData();
+    body.append("image", base64);
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body });
+    const json = await res.json();
+    if (json.success) {
+      formPhotoUrl = json.data.url;
+      statusEl.textContent = "업로드 완료 · 다른 사진으로 바꾸려면 다시 선택하세요";
+    } else {
+      throw new Error("upload failed");
+    }
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "업로드 실패했어요. 다시 선택하거나 사진 없이 등록해주세요.";
+    formPhotoUrl = null;
+  } finally {
+    formPhotoUploading = false;
+  }
+});
+
+el("#submitFormBtn").addEventListener("click", async () => {
+  const product = el("#f_product").value.trim();
+  const totalPrice = Number(el("#f_price").value);
+  const targetCount = Number(el("#f_target").value);
+  const nickname = el("#f_nickname").value.trim();
+  const errorEl = el("#formError");
+
+  if (!product || !totalPrice || !formLocation || !nickname) {
+    errorEl.textContent = "상품명, 총 가격, 위치(지도에서 검색), 닉네임은 꼭 입력해야 해요.";
+    errorEl.classList.remove("hidden"); return;
+  }
+  if (totalPrice <= 0 || targetCount < 2) {
+    errorEl.textContent = "가격은 0보다 커야 하고, 최소 2명부터 모집할 수 있어요.";
+    errorEl.classList.remove("hidden"); return;
+  }
+  if (formPhotoUploading) {
+    errorEl.textContent = "사진 업로드가 끝날 때까지 잠시만 기다려주세요.";
+    errorEl.classList.remove("hidden"); return;
+  }
+  errorEl.classList.add("hidden");
+
+  const deal = {
+    product, store: el("#f_store").value.trim(), totalPrice, targetCount, location: formLocation,
+    tags: selectedTags, meetMethod: el("#f_meet").value, contactLink: el("#f_contact").value.trim(),
+    photoUrl: formPhotoUrl || null,
+    participants: [{ nickname, units: 1, received: false }], status: "open",
+    createdAt: Date.now(), priceCheckedAt: Date.now(), priceConfirmations: 1,
+    reportCount: 0, reviewGood: 0, reviewBad: 0,
+  };
+  const ref = await addDoc(collection(db, "deals"), deal);
+  if (analytics) logEvent(analytics, "deal_created", { product: deal.product, target_count: deal.targetCount });
+  joinedIds.add(ref.id);
+  selectedTags = [];
+  formLocation = null;
+  el("#f_locSearch").value = "";
+  el("#f_locResult").classList.add("hidden");
+  el("#f_map").classList.add("hidden");
+  document.querySelectorAll(".tag-pick").forEach((b) => b.className = "tag-pick text-xs font-semibold px-2.5 py-1 rounded-full border border-kraft bg-white");
+  document.querySelectorAll("#formFields input, #formFields select").forEach((i) => i.value = "");
+  closeForm();
+});
+
+function unitsOf(p) {
+  return p.units || 1; // 레거시 데이터(참여자 1명 = 1개) 호환
+}
+function filledOf(d) {
+  return (d.participants || []).reduce((sum, p) => sum + unitsOf(p), 0);
+}
+
+async function joinDeal(id, nickname, units) {
+  const ref = doc(db, "deals", id);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    const data = snap.data();
+    if (data.participants.some((p) => p.nickname === nickname)) return;
+    const filled = filledOf(data);
+    const remaining = data.targetCount - filled;
+    const take = Math.min(Math.max(1, units), remaining);
+    const participants = [...data.participants, { nickname, units: take, received: false }];
+    const newFilled = filled + take;
+    tx.update(ref, { participants, status: newFilled >= data.targetCount ? "matched" : "open" });
+  });
+  joinedIds.add(id);
+  if (analytics) logEvent(analytics, "deal_joined", { deal_id: id });
+}
+
+async function confirmPrice(id) {
+  await updateDoc(doc(db, "deals", id), { priceCheckedAt: Date.now(), priceConfirmations: increment(1) });
+}
+
+/* ---------- 매칭 완료 이후 프로세스: 수령 확인 → 완료 → 후기 / 신고 ---------- */
+async function markReceived(id, nickname) {
+  const ref = doc(db, "deals", id);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    const data = snap.data();
+    const participants = data.participants.map((p) =>
+      p.nickname === nickname ? { ...p, received: true } : p
+    );
+    const allReceived = participants.every((p) => p.received);
+    tx.update(ref, { participants, status: allReceived ? "completed" : data.status });
+  });
+}
+
+const reviewedIds = new Set();
+async function addReview(id, type) {
+  if (reviewedIds.has(id)) return;
+  reviewedIds.add(id);
+  await updateDoc(doc(db, "deals", id), { [type === "good" ? "reviewGood" : "reviewBad"]: increment(1) });
+}
+
+const reportedIds = new Set();
+async function reportDeal(id) {
+  if (reportedIds.has(id)) return;
+  if (!confirm("이 소분 글을 신고하시겠어요? (사기, 노쇼, 허위 정보 등)")) return;
+  reportedIds.add(id);
+  await updateDoc(doc(db, "deals", id), { reportCount: increment(1) });
+  alert("신고가 접수됐어요. 검토 후 조치할게요.");
+}
+
+/* ---------- 위치 검색 & 지도 선택 (등록 폼) ---------- */
+function ensureFormMap(lat, lng) {
+  const mapEl = el("#f_map");
+  mapEl.classList.remove("hidden");
+  const center = new kakao.maps.LatLng(lat, lng);
+  if (!formMap) {
+    formMap = new kakao.maps.Map(mapEl, { center, level: 4 });
+    formGeocoder = new kakao.maps.services.Geocoder();
+    formMarker = new kakao.maps.Marker({ position: center, map: formMap, draggable: true });
+    kakao.maps.event.addListener(formMarker, "dragend", () => {
+      const pos = formMarker.getPosition();
+      reverseGeocodeToForm(pos.getLat(), pos.getLng());
+    });
+  } else {
+    formMap.relayout();
+    formMap.setCenter(center);
+    formMarker.setPosition(center);
+  }
+}
+
+function reverseGeocodeToForm(lat, lng) {
+  formGeocoder.coord2Address(lng, lat, (result, status) => {
+    let name = `위도 ${lat.toFixed(4)}, 경도 ${lng.toFixed(4)}`;
+    if (status === kakao.maps.services.Status.OK && result[0]) {
+      const addr = result[0].address;
+      name = addr.region_3depth_name || addr.region_2depth_name || addr.address_name;
+    }
+    formLocation = { name, lat, lng };
+    const resultEl = el("#f_locResult");
+    resultEl.textContent = `선택된 위치: ${name}`;
+    resultEl.classList.remove("hidden");
+  });
+}
+
+el("#f_locSearchBtn").addEventListener("click", () => {
+  const query = el("#f_locSearch").value.trim();
+  const errorEl = el("#f_locError");
+  if (!query) { errorEl.textContent = "검색할 위치를 입력해주세요."; errorEl.classList.remove("hidden"); return; }
+  if (!kakaoReady) { errorEl.textContent = "지도를 아직 불러오는 중이에요. 잠시 후 다시 시도해주세요."; errorEl.classList.remove("hidden"); return; }
+  errorEl.classList.add("hidden");
+
+  const geocoder = new kakao.maps.services.Geocoder();
+  const places = new kakao.maps.services.Places();
+  geocoder.addressSearch(query, (result, status) => {
+    if (status === kakao.maps.services.Status.OK && result[0]) {
+      applyLocation(result[0].y, result[0].x, result[0].address_name);
+    } else {
+      // 주소로 못 찾으면 장소명(카페, 매장 등)으로 재검색
+      places.keywordSearch(query, (result2, status2) => {
+        if (status2 === kakao.maps.services.Status.OK && result2[0]) {
+          applyLocation(result2[0].y, result2[0].x, result2[0].place_name);
+        } else {
+          errorEl.textContent = "위치를 찾지 못했어요. 다른 검색어로 시도해주세요.";
+          errorEl.classList.remove("hidden");
+        }
+      });
+    }
+  });
+});
+
+function applyLocation(lat, lng, name) {
+  lat = Number(lat); lng = Number(lng);
+  ensureFormMap(lat, lng);
+  reverseGeocodeToForm(lat, lng); // 동 단위 이름으로 정규화
+}
+
+/* ---------- 피드 지도 뷰 ---------- */
+function renderFeedMap(filtered) {
+  const mapEl = el("#mapView");
+  const withCoords = filtered.filter((d) => locOf(d).lat != null);
+
+  if (!feedMap) {
+    feedMap = new kakao.maps.Map(mapEl, {
+      center: new kakao.maps.LatLng(37.4200, 127.1265), // 기본: 성남시
+      level: 8,
+    });
+  } else {
+    feedMap.relayout();
+  }
+
+  feedMarkers.forEach((m) => m.setMap(null));
+  feedMarkers = [];
+
+  if (withCoords.length === 0) return;
+
+  const bounds = new kakao.maps.LatLngBounds();
+  withCoords.forEach((d) => {
+    const loc = locOf(d);
+    const pos = new kakao.maps.LatLng(loc.lat, loc.lng);
+    const marker = new kakao.maps.Marker({ position: pos, map: feedMap });
+    const perPerson = d.totalPrice / d.targetCount;
+    const iw = new kakao.maps.InfoWindow({
+      content: `<div style="padding:8px 10px;font-size:12px;line-height:1.5;font-family:'IBM Plex Sans KR',sans-serif;min-width:160px;">
+        <strong>${d.product}</strong><br/>
+        <span style="color:#E8542E;font-weight:700;">${wonNum(perPerson)}원</span> / 1인<br/>
+        ${d.status === "matched" ? "모집 완료" : `${filledOf(d)}/${d.targetCount}명`} · ${loc.name}
+      </div>`,
+    });
+    kakao.maps.event.addListener(marker, "click", () => iw.open(feedMap, marker));
+    feedMarkers.push(marker);
+    bounds.extend(pos);
+  });
+  feedMap.setBounds(bounds);
+}
+
+/* ---------- 렌더링 ---------- */
+function dealCard(d) {
+  const perPerson = d.totalPrice / d.targetCount;
+  const filled = filledOf(d);
+  const remaining = d.targetCount - filled;
+  const matched = d.status === "matched";
+  const completed = d.status === "completed";
+  const full = remaining <= 0;
+  const alreadyIn = joinedIds.has(d.id);
+  const priceAge = daysSince(d.priceCheckedAt ?? d.createdAt);
+  const stale = priceAge >= 7;
+  const reportCount = d.reportCount || 0;
+
+  const segs = Array.from({ length: Math.min(d.targetCount, 12) }).map((_, i) =>
+    `<div class="division-seg ${i < filled ? `filled ${matched || completed ? "matched" : ""}` : ""}"></div>`
+  ).join("");
+
+  const tagChips = (d.tags || []).map((t) =>
+    `<span class="text-[10px] px-2 py-0.5 rounded-full border border-kraft text-[#6E6650]">#${t}</span>`).join("");
+
+  const participantChips = d.participants.map((p) =>
+    `<span class="text-[11px] px-2 py-0.5 rounded-full bg-bg border border-kraft text-ink">${p.nickname}${unitsOf(p) > 1 ? ` ×${unitsOf(p)}` : ""}</span>`).join("");
+
+  const unitOptions = Array.from({ length: Math.max(1, remaining) }).map((_, i) =>
+    `<option value="${i + 1}">${i + 1}인분</option>`).join("");
+
+  const receiptChecklist = (d.participants || []).map((p) => `
+    <button class="mark-received-btn text-xs px-2.5 py-1 rounded-full border ${p.received ? "bg-ink text-white border-ink" : "bg-white border-kraft text-[#6E6650]"}"
+      data-id="${d.id}" data-nickname="${p.nickname}">
+      ${p.nickname} ${p.received ? "받음" : "받으면 누르기"}
+    </button>`).join("");
+
+  const ctaBlock = completed ? `
+    <div class="p-3 flex flex-col gap-2 bg-white" style="border-left: 4px solid #8A8064;">
+      <div class="flex items-center gap-2">
+        <span class="ad-sticker text-[10px] font-bold px-2 py-0.5 rounded-full bg-kraft text-ink tracking-wide">거래 완료</span>
+        <p class="text-xs text-[#6E6650]">수고하셨어요 — 다음 사람을 위해 후기를 남겨주세요</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="review-btn text-xs font-semibold px-3 py-1.5 rounded-full border border-kraft bg-white text-accent2" data-id="${d.id}" data-type="good">원활했어요 ${d.reviewGood ? `(${d.reviewGood})` : ""}</button>
+        <button class="review-btn text-xs font-semibold px-3 py-1.5 rounded-full border border-kraft bg-white text-accent" data-id="${d.id}" data-type="bad">문제 있었어요 ${d.reviewBad ? `(${d.reviewBad})` : ""}</button>
+      </div>
+    </div>` : matched ? `
+    <div class="p-3 flex flex-col gap-2 bg-white" style="border-left: 4px solid #2F6F5E;">
+      <div class="flex items-center gap-2">
+        <span class="ad-sticker text-[10px] font-bold px-2 py-0.5 rounded-full bg-kraft text-ink tracking-wide">인원 마감</span>
+        <p class="text-xs text-accent2 font-semibold">받으면 아래에서 체크해주세요</p>
+      </div>
+      ${d.contactLink
+        ? `<a href="${d.contactLink}" target="_blank" rel="noreferrer" class="text-xs underline text-accent2 inline-block">채팅방 참여하기</a>`
+        : `<p class="text-xs text-[#6E6650]">작성자가 곧 연락 방법을 공유할 거예요.</p>`}
+      <div class="flex flex-wrap gap-1.5">${receiptChecklist}</div>
+    </div>` : alreadyIn ? `
+    <div class="rounded-lg p-2.5 text-xs font-semibold text-center bg-bg text-accent2">참여 완료 · 남은 자리를 기다리는 중이에요</div>` : `
+    <div class="flex flex-col gap-1.5">
+      <div class="flex gap-2">
+        <input class="join-nick input flex-1" placeholder="닉네임" maxlength="12" data-id="${d.id}" />
+        <select class="join-units input" style="width:auto; flex-shrink:0;" data-id="${d.id}">${unitOptions}</select>
+        <button class="join-btn rounded-lg px-4 text-sm font-bold text-white bg-accent whitespace-nowrap ${full ? "opacity-50 pointer-events-none" : ""}" data-id="${d.id}">참여하기</button>
+      </div>
+      <p class="join-error text-xs text-accent hidden" data-id="${d.id}"></p>
+    </div>`;
+
+  return `
+  <div class="rounded-2xl flex flex-col bg-white border border-kraft shadow-sm overflow-hidden ${completed ? "card-stripe-completed" : matched ? "card-stripe-matched" : "card-stripe-open"}">
+    ${d.photoUrl ? `<img src="${d.photoUrl}" class="w-full object-cover" style="aspect-ratio: 4/3;" alt="${d.product}" />` : ""}
+    <div class="p-5 flex flex-col gap-3">
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        ${d.store ? `<p class="text-[11px] font-semibold mb-1 text-accent2 tracking-wide truncate">${d.store}</p>` : ""}
+        <h3 class="text-base font-display font-extrabold leading-snug text-ink">${d.product}</h3>
+        ${reportCount >= 2 ? `<span class="ad-sticker inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent text-white tracking-wide mt-1">신고 ${reportCount}건 · 주의</span>` : ""}
+      </div>
+      <span class="text-[11px] font-semibold whitespace-nowrap text-[#6E6650] mt-0.5">${completed ? "거래 완료" : matched ? "모집 완료" : `${filled}/${d.targetCount}명`}</span>
+    </div>
+
+    <div class="flex gap-1">${segs}</div>
+
+    <div class="flex items-baseline justify-between gap-2 flex-wrap">
+      <div class="flex items-baseline gap-2">
+        <span class="text-xl font-extrabold text-accent"><span class="font-mono">${wonNum(perPerson)}</span>원</span>
+        <span class="text-xs text-[#8A8064]">/ 1인 · 총 <span class="font-mono">${wonNum(d.totalPrice)}</span>원</span>
+      </div>
+      <button class="confirm-price-btn text-[11px] ${stale ? "text-accent font-semibold" : "text-[#8A8064]"} underline decoration-dotted" data-id="${d.id}" title="이 가격이 지금도 맞으면 눌러주세요">
+        ${priceAge === 0 ? "오늘 확인됨" : `${priceAge}일 전 확인됨`}${stale ? " · 확인 필요" : ""}
+      </button>
+    </div>
+
+    <div class="flex items-center gap-3 text-xs text-[#6E6650]">
+      <span>📍 ${locOf(d).name}</span><span>${d.meetMethod}</span>
+    </div>
+
+    ${tagChips ? `<div class="flex flex-wrap gap-1">${tagChips}</div>` : ""}
+    <div class="flex flex-wrap gap-1.5">${participantChips}</div>
+
+    ${ctaBlock}
+
+    <button class="report-btn text-[10px] text-[#B9AE8C] hover:text-accent self-end underline decoration-dotted" data-id="${d.id}">신고하기</button>
+    </div>
+  </div>`;
+}
+
+function adSlot() {
+  return `
+  <div class="rounded-xl p-3 flex flex-col items-center justify-center gap-1 min-h-[120px]" style="border:1.5px dashed #B9AE8C; background: repeating-linear-gradient(135deg, #EFE9D8 0px, #EFE9D8 10px, #E7DFC7 10px, #E7DFC7 20px);">
+    <span class="ad-sticker text-[10px] font-bold px-2 py-0.5 rounded-full bg-kraft text-ink tracking-wide">스폰서 광고</span>
+    <ins class="kakao_ad_area" style="display:none; width:320px; height:100px;"
+      data-ad-unit="DAN-mtEWsDg5afpXsIsj"
+      data-ad-width="320"
+      data-ad-height="100"></ins>
+  </div>`;
+}
+
+function updateProductSuggestions() {
+  const names = [...new Set(deals.map((d) => d.product))].sort();
+  el("#productSuggestions").innerHTML = names.map((n) => `<option value="${n}"></option>`).join("");
+}
+
+function renderHeroSlide() {
+  const open = deals.filter((d) => d.status === "open").sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
+  const counterEl = el("#heroCounter");
+  if (open.length === 0) {
+    counterEl.classList.add("hidden");
+    return; // 데이터 없으면 처음 정적 예시 그대로 둠
+  }
+  if (heroIndex >= open.length) heroIndex = 0;
+  const d = open[heroIndex];
+  const filled = filledOf(d);
+  const segs = Array.from({ length: Math.min(d.targetCount, 8) }).map((_, i) =>
+    `<div class="division-seg ${i < filled ? "filled" : ""}"></div>`).join("");
+  el("#heroSlide").innerHTML = `
+    <p class="text-xs font-semibold text-white truncate">${d.product} · ${wonNum(d.totalPrice)}원 · ${d.targetCount}명 모집</p>
+    <div class="mt-1.5 max-w-[220px] flex gap-1">${segs}</div>`;
+  if (open.length > 1) {
+    counterEl.textContent = `${heroIndex + 1}/${open.length}`;
+    counterEl.classList.remove("hidden");
+  } else {
+    counterEl.classList.add("hidden");
+  }
+}
+
+function startHeroCarousel() {
+  if (heroTimer) return;
+  heroTimer = setInterval(() => {
+    heroIndex += 1;
+    renderHeroSlide();
+  }, 4000);
+}
+
+function render() {
+  updateProductSuggestions();
+  renderHeroSlide();
+  startHeroCarousel();
+  const loc = el("#locFilter").value.trim();
+  const filtered = deals
+    .filter((d) => (statusFilter === "all" ? true : d.status === statusFilter))
+    .filter((d) => (tagFilter === "all" ? true : (d.tags || []).includes(tagFilter)))
+    .filter((d) => (loc ? locOf(d).name.includes(loc) : true));
+
+  const statusEl = el("#feedStatus"), feedEl = el("#feed"), mapEl = el("#mapView");
+
+  if (currentView === "map") {
+    feedEl.classList.add("hidden");
+    mapEl.classList.remove("hidden");
+    if (filtered.length === 0) {
+      statusEl.classList.remove("hidden");
+      statusEl.innerHTML = `<p class="text-sm text-[#8A8064]">조건에 맞는 소분이 없어요.</p>`;
+      return;
+    }
+    statusEl.classList.add("hidden");
+    if (!kakaoReady) {
+      mapEl.innerHTML = `<div class="flex items-center justify-center h-full text-sm text-[#8A8064]">지도를 불러오는 중이거나, KAKAO_APP_KEY 설정이 필요해요.</div>`;
+      return;
+    }
+    renderFeedMap(filtered);
+    return;
+  }
+
+  feedEl.classList.remove("hidden");
+  mapEl.classList.add("hidden");
+
+  if (filtered.length === 0) {
+    feedEl.innerHTML = "";
+    statusEl.classList.remove("hidden");
+    statusEl.innerHTML = deals.length === 0
+      ? `<p class="text-sm font-semibold text-ink">아직 등록된 소분이 없어요.</p><p class="text-xs mt-1 text-[#8A8064]">첫 소분을 올려보세요.</p>`
+      : `<p class="text-sm text-[#8A8064]">조건에 맞는 소분이 없어요.</p>`;
+    return;
+  }
+  statusEl.classList.add("hidden");
+  feedEl.innerHTML = filtered.map((d, i) => dealCard(d) + (i === 2 ? adSlot() : "")).join("");
+
+  feedEl.querySelectorAll(".join-btn").forEach((btn) => btn.addEventListener("click", async () => {
+    const id = btn.dataset.id;
+    const input = feedEl.querySelector(`.join-nick[data-id="${id}"]`);
+    const unitsSelect = feedEl.querySelector(`.join-units[data-id="${id}"]`);
+    const errorP = feedEl.querySelector(`.join-error[data-id="${id}"]`);
+    const nickname = input.value.trim();
+    const units = Number(unitsSelect.value) || 1;
+    if (!nickname) { errorP.textContent = "닉네임을 입력해야 참여할 수 있어요."; errorP.classList.remove("hidden"); return; }
+    btn.textContent = "참여 중..."; btn.disabled = true;
+    await joinDeal(id, nickname, units);
+  }));
+  feedEl.querySelectorAll(".confirm-price-btn").forEach((btn) => btn.addEventListener("click", () => confirmPrice(btn.dataset.id)));
+  feedEl.querySelectorAll(".mark-received-btn").forEach((btn) => btn.addEventListener("click", () => markReceived(btn.dataset.id, btn.dataset.nickname)));
+  feedEl.querySelectorAll(".review-btn").forEach((btn) => btn.addEventListener("click", () => addReview(btn.dataset.id, btn.dataset.type)));
+  feedEl.querySelectorAll(".report-btn").forEach((btn) => btn.addEventListener("click", () => reportDeal(btn.dataset.id)));
+}
+</script>
+</body>
+</html>
