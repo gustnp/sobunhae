@@ -192,6 +192,9 @@ import {
   getFirestore, collection, addDoc, onSnapshot, doc, runTransaction,
   updateDoc, increment, query, orderBy, getDocs, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getStorage, ref as storageRef, uploadBytes, getDownloadURL,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBDmMnZeSK9k6RMfU0uIRDQ8Hbj-HLhYL8",
@@ -202,9 +205,6 @@ const firebaseConfig = {
   appId: "1:1076905142580:web:2ae1f34f7f822b32435d61",
   measurementId: "G-81F2RNVDHL",
 };
-
-// ImgBB(무료 이미지 호스팅) API 키 — api.imgbb.com 에서 발급 (신용카드 불필요)
-const IMGBB_API_KEY = "b481d876c33f3e939320034188b6702d";
 
 // 업로드 전 이미지를 리사이즈/압축 — 원본(수 MB) 그대로 올리면 카드에서 로딩이 느려짐
 async function resizeImageForUpload(file, maxDim = 1280, quality = 0.82) {
@@ -234,7 +234,7 @@ const wonNum = (n) => Math.round(n).toLocaleString("ko-KR");
 const daysSince = (ts) => Math.floor((Date.now() - (ts?.toMillis?.() ?? ts ?? Date.now())) / 86400000);
 const el = (sel) => document.querySelector(sel);
 
-let app, db, analytics, deals = [];
+let app, db, analytics, storage, deals = [];
 let firebaseReady = false;
 let statusFilter = "all", tagFilter = "all", joinedIds = new Set();
 let selectedTags = [];
@@ -258,6 +258,7 @@ if (window.kakao && window.kakao.maps) {
 try {
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
+  storage = getStorage(app);
   analytics = getAnalytics(app); // 방문자/이용 통계 — Firebase 콘솔 > Analytics 에서 확인
   firebaseReady = true;
 } catch (e) {
@@ -412,8 +413,8 @@ el("#f_photo").addEventListener("change", async (e) => {
   el("#f_photoRemoveBtn").classList.remove("hidden");
   formPhotoUrl = null;
 
-  if (IMGBB_API_KEY === "IMGBB_API_KEY") {
-    statusEl.textContent = "사진 업로드 기능이 아직 설정되지 않았어요 (IMGBB_API_KEY 필요) — 사진 없이도 등록은 가능해요.";
+  if (!storage) {
+    statusEl.textContent = "사진 업로드 기능을 쓸 수 없어요 — 사진 없이도 등록은 가능해요.";
     statusEl.classList.remove("hidden");
     return;
   }
@@ -424,22 +425,11 @@ el("#f_photo").addEventListener("change", async (e) => {
 
   try {
     const uploadBlob = await resizeImageForUpload(file);
-    const base64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(",")[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(uploadBlob);
-    });
-    const body = new FormData();
-    body.append("image", base64);
-    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body });
-    const json = await res.json();
-    if (json.success) {
-      formPhotoUrl = json.data.url;
-      statusEl.textContent = "업로드 완료 · 다른 사진으로 바꾸려면 다시 선택하세요";
-    } else {
-      throw new Error("upload failed");
-    }
+    const path = `deals/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+    const fileRef = storageRef(storage, path);
+    await uploadBytes(fileRef, uploadBlob, { contentType: "image/jpeg" });
+    formPhotoUrl = await getDownloadURL(fileRef);
+    statusEl.textContent = "업로드 완료 · 다른 사진으로 바꾸려면 다시 선택하세요";
   } catch (err) {
     console.error(err);
     statusEl.textContent = "업로드 실패했어요. 다시 선택하거나 사진 없이 등록해주세요.";

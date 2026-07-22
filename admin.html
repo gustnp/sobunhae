@@ -101,6 +101,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {
   getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, setDoc, getDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getStorage, ref as storageRef, uploadBytes, getDownloadURL,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 // 비밀번호를 반드시 바꿔주세요. 이건 실제 보안이 아니라 최소한의 접근 차단입니다.
 const ADMIN_PASSWORD = "sobunhae2026";
@@ -132,10 +135,11 @@ function checkPassword() {
 el("#pwSubmit").addEventListener("click", checkPassword);
 el("#pwInput").addEventListener("keydown", (e) => { if (e.key === "Enter") checkPassword(); });
 
-let db;
+let db, storage;
 function initFirebase() {
   const app = initializeApp(firebaseConfig);
   db = getFirestore(app);
+  storage = getStorage(app);
   const q = query(collection(db, "deals"), orderBy("createdAt", "desc"));
   onSnapshot(q, (snap) => {
     deals = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -156,8 +160,6 @@ function initFirebase() {
     }
   });
 }
-
-const IMGBB_API_KEY = "b481d876c33f3e939320034188b6702d";
 
 // 업로드 전 이미지를 리사이즈/압축 — 원본 그대로 올리면 배너 로딩이 느려짐
 async function resizeImageForUpload(file, maxDim = 1600, quality = 0.85) {
@@ -192,19 +194,12 @@ el("#bannerUploadBtn").addEventListener("click", async () => {
   statusEl.textContent = "업로드 중...";
   try {
     const uploadBlob = await resizeImageForUpload(bannerFile);
-    const base64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(",")[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(uploadBlob);
-    });
-    const body = new FormData();
-    body.append("image", base64);
-    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body });
-    const json = await res.json();
-    if (!json.success) throw new Error("upload failed");
+    const path = `banner/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+    const fileRef = storageRef(storage, path);
+    await uploadBytes(fileRef, uploadBlob, { contentType: "image/jpeg" });
+    const imageUrl = await getDownloadURL(fileRef);
     await setDoc(doc(db, "config", "banner"), {
-      imageUrl: json.data.url, link: el("#bannerLink").value.trim(), updatedAt: Date.now(),
+      imageUrl, link: el("#bannerLink").value.trim(), updatedAt: Date.now(),
     });
     statusEl.textContent = "배너가 저장됐어요.";
     bannerFile = null;
