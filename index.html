@@ -48,7 +48,7 @@
 
     <!-- 관리자가 올린 배너 (있으면 아래 캐러셀 대신 표시) -->
     <a id="heroBannerLink" href="#" target="_blank" rel="noreferrer" class="mt-5 rounded-2xl overflow-hidden border border-white/10" style="display:none;">
-      <img id="heroBannerImg" class="w-full object-cover" style="aspect-ratio: 2/1; display:block;" alt="배너" />
+      <img id="heroBannerImg" class="w-full object-cover" style="aspect-ratio: 2/1; display:block;" alt="배너" decoding="async" />
     </a>
 
     <!-- 시그니처: 실시간 모집중 캐러셀 (배너 없을 때 기본으로 표시) -->
@@ -205,6 +205,28 @@ const firebaseConfig = {
 
 // ImgBB(무료 이미지 호스팅) API 키 — api.imgbb.com 에서 발급 (신용카드 불필요)
 const IMGBB_API_KEY = "b481d876c33f3e939320034188b6702d";
+
+// 업로드 전 이미지를 리사이즈/압축 — 원본(수 MB) 그대로 올리면 카드에서 로딩이 느려짐
+async function resizeImageForUpload(file, maxDim = 1280, quality = 0.82) {
+  try {
+    const bitmap = await createImageBitmap(file);
+    let { width, height } = bitmap;
+    if (width > maxDim || height > maxDim) {
+      const scale = Math.min(maxDim / width, maxDim / height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, width, height);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+    return blob || file;
+  } catch (e) {
+    console.error("이미지 리사이즈 실패, 원본으로 업로드:", e);
+    return file;
+  }
+}
 
 const TAGS = ["신선/냉동", "간식/과자", "생활용품", "유아/키즈", "건강/영양", "반려동물", "주방/가전", "기타"];
 const won = (n) => `${Math.round(n).toLocaleString("ko-KR")}원`;
@@ -395,11 +417,12 @@ el("#f_photo").addEventListener("change", async (e) => {
   statusEl.classList.remove("hidden");
 
   try {
+    const uploadBlob = await resizeImageForUpload(file);
     const base64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result.split(",")[1]);
       reader.onerror = reject;
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(uploadBlob);
     });
     const body = new FormData();
     body.append("image", base64);
@@ -690,7 +713,7 @@ function dealCard(d) {
 
   return `
   <div class="rounded-2xl flex flex-col bg-white border border-kraft shadow-sm overflow-hidden ${completed ? "card-stripe-completed" : matched ? "card-stripe-matched" : "card-stripe-open"}">
-    ${d.photoUrl ? `<img src="${d.photoUrl}" class="w-full object-cover" style="aspect-ratio: 4/3;" alt="${d.product}" />` : ""}
+    ${d.photoUrl ? `<img src="${d.photoUrl}" class="w-full object-cover" style="aspect-ratio: 4/3;" alt="${d.product}" loading="lazy" decoding="async" />` : ""}
     <div class="p-5 flex flex-col gap-3">
     <div class="flex items-start justify-between gap-2">
       <div class="min-w-0">
