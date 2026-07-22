@@ -367,7 +367,13 @@ if (firebaseReady) {
     const carouselEl = el("#heroCarousel");
     if (snap.exists()) {
       const data = snap.data();
-      el("#heroBannerImg").src = data.imageUrl;
+      const bannerImgEl = el("#heroBannerImg");
+      // 배너 이미지가 깨져있으면(호스팅 만료/삭제 등) 엑박 대신 원래 캐러셀로 되돌아감
+      bannerImgEl.onerror = () => {
+        linkEl.style.display = "none";
+        carouselEl.style.display = "flex";
+      };
+      bannerImgEl.src = data.imageUrl;
       linkEl.href = data.link || "#";
       linkEl.style.display = "block";
       carouselEl.style.display = "none";
