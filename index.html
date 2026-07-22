@@ -809,6 +809,7 @@ function render() {
     feedEl.classList.add("hidden");
     mapEl.classList.remove("hidden");
     if (filtered.length === 0) {
+      mapEl.classList.add("hidden"); // 결과 없을 땐 빈 지도 박스 대신 안내 문구만 표시
       statusEl.classList.remove("hidden");
       statusEl.innerHTML = `<p class="text-sm text-[#8A8064]">조건에 맞는 소분이 없어요.</p>`;
       return;
