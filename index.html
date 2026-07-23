@@ -97,6 +97,17 @@
   </span>
 </div>
 
+<!-- 이번주 인기 소분템 -->
+<div id="trendingBar" class="max-w-2xl mx-auto px-5 mt-3 flex items-center gap-1.5 flex-wrap hidden"></div>
+
+<!-- 관심 키워드: 계정/알림 없이도, 재방문 시 관심 상품을 눈에 띄게 -->
+<div class="max-w-2xl mx-auto px-5 mt-2 flex items-center gap-1.5 flex-wrap">
+  <span class="text-xs text-[#8A8064] whitespace-nowrap">⭐ 관심 키워드</span>
+  <div id="watchChips" class="flex items-center gap-1.5 flex-wrap"></div>
+  <input id="watchInput" placeholder="키워드 추가 후 Enter" maxlength="12"
+    class="text-xs outline-none rounded-full px-3 py-1 bg-white border border-kraft" style="width:130px;" />
+</div>
+
 <!-- 피드 -->
 <main class="max-w-2xl mx-auto px-5 mt-5">
   <div id="feedStatus" class="text-sm text-center py-16 text-[#8A8064]">불러오는 중...</div>
@@ -252,6 +263,17 @@ let app, db, analytics, storage, deals = [];
 let firebaseReady = false;
 let statusFilter = "all", tagFilter = "all";
 
+// 관심 키워드 — 계정/푸시 인프라가 없어서 서버 알림은 못 주지만, 재방문했을 때
+// 내가 등록한 키워드와 일치하는 소분을 눈에 띄게 표시해주는 최소 버전.
+function loadWatchKeywords() {
+  try { return JSON.parse(localStorage.getItem("sobunhae_watch") || "[]"); }
+  catch (e) { return []; }
+}
+function saveWatchKeywords() {
+  try { localStorage.setItem("sobunhae_watch", JSON.stringify(watchKeywords)); } catch (e) {}
+}
+let watchKeywords = loadWatchKeywords();
+
 // 기기(브라우저) 기준으로 "내가 참여한 글"을 기억해두는 저장소.
 // 로그인이 없어서 진짜 신원 확인은 아니고, 새로고침/재방문에도 내 참여 상태를
 // 알아보게 해주는 최소한의 장치예요. 브라우저 데이터 지우거나 다른 기기로
@@ -327,6 +349,20 @@ document.querySelectorAll(".status-chip").forEach((b) => b.addEventListener("cli
   statusFilter = b.dataset.status; renderStatusChips(); render();
 }));
 el("#tagFilter").addEventListener("change", (e) => { tagFilter = e.target.value; render(); });
+renderWatchChips();
+el("#watchInput").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  const val = e.target.value.trim();
+  if (!val) return;
+  if (watchKeywords.length >= 5) { alert("관심 키워드는 최대 5개까지 등록할 수 있어요."); return; }
+  if (!watchKeywords.includes(val)) {
+    watchKeywords.push(val);
+    saveWatchKeywords();
+    renderWatchChips();
+    render();
+  }
+  e.target.value = "";
+});
 el("#locFilter").addEventListener("input", render);
 
 document.querySelectorAll(".tag-pick").forEach((b) => b.addEventListener("click", () => {
@@ -367,6 +403,62 @@ document.querySelectorAll(".view-btn").forEach((b) => b.addEventListener("click"
 function locOf(d) {
   if (d.location && typeof d.location === "object") return d.location;
   return { name: d.location || "위치 미상", lat: null, lng: null };
+}
+
+// 호스트(참여자 0번)의 여러 소분에 걸친 후기 누적치. 닉네임이 유일한 신원은 아니라서
+// (로그인이 없음) 완벽한 신뢰 지표는 아니지만, 같은 닉네임을 계속 쓰는 사람에게는
+// 참고할 만한 신호가 됨.
+function hostTrust(nickname) {
+  let good = 0, bad = 0;
+  deals.forEach((d) => {
+    const host = d.participants && d.participants[0];
+    if (host && host.nickname === nickname) {
+      good += d.reviewGood || 0;
+      bad += d.reviewBad || 0;
+    }
+  });
+  return { good, bad };
+}
+
+// 최근 7일 내 등록된 소분을 상품명 기준으로 집계해 인기 TOP N을 뽑음.
+function topProductsThisWeek(limit = 5) {
+  const counts = new Map();
+  deals.forEach((d) => {
+    if (!d.product || daysSince(d.createdAt) > 7) return;
+    counts.set(d.product, (counts.get(d.product) || 0) + 1);
+  });
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
+}
+
+function renderTrending() {
+  const bar = el("#trendingBar");
+  if (!bar) return;
+  const top = topProductsThisWeek(5);
+  if (top.length === 0) { bar.classList.add("hidden"); return; }
+  bar.classList.remove("hidden");
+  bar.innerHTML = `<span class="text-xs font-bold text-accent2 whitespace-nowrap">🔥 이번주 인기</span>` +
+    top.map(([name, count]) =>
+      `<span class="text-xs px-2.5 py-1 rounded-full bg-white border border-kraft whitespace-nowrap">${name} <b class="text-accent font-mono">${count}</b></span>`
+    ).join("");
+}
+
+function renderWatchChips() {
+  const wrap = el("#watchChips");
+  if (!wrap) return;
+  wrap.innerHTML = watchKeywords.map((k, i) =>
+    `<span class="text-xs px-2.5 py-1 rounded-full bg-accent2 text-white flex items-center gap-1">${k}<button class="watch-remove-btn" data-i="${i}" style="line-height:1;">×</button></span>`
+  ).join("");
+  wrap.querySelectorAll(".watch-remove-btn").forEach((btn) => btn.addEventListener("click", () => {
+    watchKeywords.splice(Number(btn.dataset.i), 1);
+    saveWatchKeywords();
+    renderWatchChips();
+    render();
+  }));
+}
+
+function matchesWatch(d) {
+  const name = (d.product || "").toLowerCase();
+  return watchKeywords.some((k) => name.includes(k.toLowerCase()));
 }
 
 const SEED = [
@@ -725,12 +817,20 @@ function dealCard(d) {
   const tagChips = (d.tags || []).map((t) =>
     `<span class="text-[10px] px-2 py-0.5 rounded-full border border-kraft text-[#6E6650]">#${t}</span>`).join("");
 
+  const watchBadge = matchesWatch(d)
+    ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent2 text-white">⭐ 관심 키워드</span>` : "";
+
   const participantChips = d.participants.map((p, i) => {
     const isHost = i === 0;
     const cls = isHost
       ? "text-[11px] px-2 py-0.5 rounded-full bg-accent2 text-white font-semibold"
       : "text-[11px] px-2 py-0.5 rounded-full bg-bg border border-kraft text-ink";
-    return `<span class="${cls}">${isHost ? "호스트 · " : ""}${p.nickname}${unitsOf(p) > 1 ? ` ×${unitsOf(p)}` : ""}</span>`;
+    let trustSuffix = "";
+    if (isHost) {
+      const { good, bad } = hostTrust(p.nickname);
+      if (good > 0 || bad > 0) trustSuffix = ` · 👍${good}${bad > 0 ? ` ⚠️${bad}` : ""}`;
+    }
+    return `<span class="${cls}">${isHost ? "호스트 · " : ""}${p.nickname}${unitsOf(p) > 1 ? ` ×${unitsOf(p)}` : ""}${trustSuffix}</span>`;
   }).join("");
 
   const unitOptions = Array.from({ length: Math.max(1, remaining) }).map((_, i) =>
@@ -809,7 +909,7 @@ function dealCard(d) {
       <span>📍 ${locOf(d).name}</span><span>${d.meetMethod}</span>
     </div>
 
-    ${tagChips ? `<div class="flex flex-wrap gap-1">${tagChips}</div>` : ""}
+    ${(tagChips || watchBadge) ? `<div class="flex flex-wrap gap-1">${watchBadge}${tagChips}</div>` : ""}
     ${(matched || completed) ? "" : `<div class="flex flex-wrap gap-1.5">${participantChips}</div>`}
 
     ${ctaBlock}
@@ -910,6 +1010,7 @@ function render() {
   updateProductSuggestions();
   renderHeroSlide();
   startHeroCarousel();
+  renderTrending();
   const loc = el("#locFilter").value.trim();
   const filtered = deals
     .filter((d) => (statusFilter === "all" ? true : d.status === statusFilter))
