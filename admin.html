@@ -220,6 +220,11 @@ function initFirebase() {
       }
     });
   });
+
+  onSnapshot(kbRef(), (snap) => {
+    kbItems = (snap.exists() && Array.isArray(snap.data().items)) ? snap.data().items : [];
+    renderKeywordBannerList();
+  });
 }
 
 // 업로드 전 이미지를 리사이즈/압축 — 원본 그대로 올리면 배너 로딩이 느려짐
@@ -301,7 +306,11 @@ document.querySelectorAll(".banner-slot").forEach((slotEl) => {
 });
 
 // ── 키워드 추천 배너 ─────────────────────────────────────
-const kbRef = doc(db, "config", "keywordBanners");
+// kbRef()는 호출 시점에 doc(db, ...)을 만드는 함수로, db가 아직 초기화되기 전인
+// 스크립트 최상단 실행 시점에 바로 doc(db,...)을 평가해 버리면(= 상수로 선언하면)
+// db가 undefined라서 즉시 에러가 나고, 그 아래 이어지는 최상단 코드(예: statusLabel, render())까지
+// 전부 초기화되지 못하는 문제가 생긴다. 그래서 반드시 함수로 감싸 지연 평가한다.
+function kbRef() { return doc(db, "config", "keywordBanners"); }
 let kbItems = []; // Firestore에 저장된 항목 {keyword, imageUrl, link}
 let kbDrafts = []; // 아직 저장 안 한 새 항목(로컬에만 존재), {id, keyword, link, imageUrl:null}
 let kbDraftSeq = 0;
@@ -368,7 +377,7 @@ function renderKeywordBannerList() {
           await uploadBytes(fileRef, uploadBlob, { contentType: "image/jpeg" });
           imageUrl = await getDownloadURL(fileRef);
         }
-        const snap = await getDoc(kbRef);
+        const snap = await getDoc(kbRef());
         const currentItems = (snap.exists() && Array.isArray(snap.data().items)) ? [...snap.data().items] : [];
         const newItem = { keyword, link, imageUrl };
         if (isDraft) {
@@ -376,7 +385,7 @@ function renderKeywordBannerList() {
         } else {
           currentItems[Number(rowKey.slice(1))] = newItem;
         }
-        await setDoc(kbRef, { items: currentItems, updatedAt: Date.now() });
+        await setDoc(kbRef(), { items: currentItems, updatedAt: Date.now() });
         if (isDraft) kbDrafts = kbDrafts.filter((d) => `d${d.id}` !== rowKey);
         delete kbFiles[rowKey];
         statusEl.textContent = "저장됐어요.";
@@ -394,24 +403,20 @@ function renderKeywordBannerList() {
         return;
       }
       if (!confirm("이 키워드 배너를 삭제할까요?")) return;
-      const snap = await getDoc(kbRef);
+      const snap = await getDoc(kbRef());
       const currentItems = (snap.exists() && Array.isArray(snap.data().items)) ? [...snap.data().items] : [];
       currentItems.splice(Number(rowKey.slice(1)), 1);
-      await setDoc(kbRef, { items: currentItems, updatedAt: Date.now() });
+      await setDoc(kbRef(), { items: currentItems, updatedAt: Date.now() });
     });
   });
 }
-
-onSnapshot(kbRef, (snap) => {
-  kbItems = (snap.exists() && Array.isArray(snap.data().items)) ? snap.data().items : [];
-  renderKeywordBannerList();
-});
 
 el("#addKeywordBannerBtn").addEventListener("click", () => {
   kbDraftSeq += 1;
   kbDrafts.push({ id: kbDraftSeq, keyword: "", link: "", imageUrl: null });
   renderKeywordBannerList();
 });
+
 
 el("#sortSelect").addEventListener("change", (e) => { sortMode = e.target.value; render(); });
 el("#statusFilterSelect").addEventListener("change", (e) => { statusFilter = e.target.value; render(); });
