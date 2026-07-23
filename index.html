@@ -711,7 +711,7 @@ function dealCard(d) {
     const cls = isHost
       ? "text-[11px] px-2 py-0.5 rounded-full bg-accent2 text-white font-semibold"
       : "text-[11px] px-2 py-0.5 rounded-full bg-bg border border-kraft text-ink";
-    return `<span class="${cls}">${isHost ? "주최 · " : ""}${p.nickname}${unitsOf(p) > 1 ? ` ×${unitsOf(p)}` : ""}</span>`;
+    return `<span class="${cls}">${isHost ? "호스트 · " : ""}${p.nickname}${unitsOf(p) > 1 ? ` ×${unitsOf(p)}` : ""}</span>`;
   }).join("");
 
   const unitOptions = Array.from({ length: Math.max(1, remaining) }).map((_, i) =>
