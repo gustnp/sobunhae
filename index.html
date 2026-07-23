@@ -279,6 +279,7 @@ let heroTimer = null;
 let banners = [];
 let bannerIndex = 0;
 let bannerTimer = null;
+let keywordBanners = []; // [{keyword, imageUrl, link}]
 let formLocation = null; // { name, lat, lng }
 let formPhotoUrl = null;
 let formPhotoUploading = false;
@@ -418,6 +419,11 @@ if (firebaseReady) {
       }, 5000);
     }
   }, () => { /* 배너 설정이 없으면 그냥 캐러셀 유지 */ });
+  onSnapshot(doc(db, "config", "keywordBanners"), (snap) => {
+    const items = (snap.exists() && Array.isArray(snap.data().items)) ? snap.data().items : [];
+    keywordBanners = items.filter((b) => b && b.keyword && b.imageUrl);
+    render();
+  }, () => { /* 키워드 배너 설정이 없으면 그냥 무시 */ });
 } else {
   el("#feedStatus").textContent = "Firebase 설정이 비어 있어요. index.html 안의 firebaseConfig를 채워주세요.";
 }
@@ -813,6 +819,23 @@ function dealCard(d) {
   </div>`;
 }
 
+// 상품명에 특정 키워드가 포함되면 해당 카드 밑에 추천 배너를 붙임 (첫 매칭 1개만)
+function matchKeywordBanner(d) {
+  const name = (d.product || "").toLowerCase();
+  return keywordBanners.find((b) => name.includes(String(b.keyword).toLowerCase()));
+}
+
+function keywordBannerSlot(b) {
+  return `
+  <a href="${b.link || "#"}" target="_blank" rel="noopener" class="rounded-xl border border-kraft bg-white flex items-center gap-3 p-3 hover:brightness-110 transition">
+    <img src="${b.imageUrl}" alt="추천 상품" class="rounded-lg object-cover" style="width:56px; height:56px; flex-shrink:0;" loading="lazy" decoding="async" />
+    <div class="min-w-0">
+      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent2 text-white tracking-wide inline-block mb-1">추천</span>
+      <p class="text-sm font-semibold text-ink truncate">${b.keyword} 관련 상품 보러가기 →</p>
+    </div>
+  </a>`;
+}
+
 function adSlot() {
   return `
   <div class="rounded-xl p-3 flex flex-col items-center justify-center gap-1 min-h-[120px]" style="border:1.5px dashed #B9AE8C; background: repeating-linear-gradient(135deg, #EFE9D8 0px, #EFE9D8 10px, #E7DFC7 10px, #E7DFC7 20px);">
@@ -925,7 +948,16 @@ function render() {
     return;
   }
   statusEl.classList.add("hidden");
-  feedEl.innerHTML = filtered.map((d, i) => dealCard(d) + (i === 2 ? adSlot() : "")).join("");
+  let lastKeywordBannerIdx = -99; // 매칭되는 카드마다 다 붙으면 도배처럼 보이니, 최소 3개 카드 간격을 두고 하나만 노출
+  feedEl.innerHTML = filtered.map((d, i) => {
+    const kb = matchKeywordBanner(d);
+    let kbHtml = "";
+    if (kb && i - lastKeywordBannerIdx >= 3) {
+      kbHtml = keywordBannerSlot(kb);
+      lastKeywordBannerIdx = i;
+    }
+    return dealCard(d) + kbHtml + (i === 2 ? adSlot() : "");
+  }).join("");
 
   feedEl.querySelectorAll(".join-btn").forEach((btn) => btn.addEventListener("click", async () => {
     const id = btn.dataset.id;

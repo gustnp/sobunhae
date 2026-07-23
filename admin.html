@@ -122,6 +122,13 @@
       </div>
     </section>
 
+    <section style="background:#fff; border:1.5px solid #D8CFB2; border-radius:12px; padding:16px; margin-bottom:20px;">
+      <p style="font-weight:800; font-size:14px; margin:0 0 4px;">키워드 추천 배너</p>
+      <p style="font-size:11px; color:#8A8064; margin:0 0 10px;">상품명에 키워드가 포함된 소분 카드 바로 밑에 추천 배너가 자동으로 붙어요. 예: 키워드 "블루베리" 등록 → 상품명에 "블루베리"가 들어간 카드 아래에 노출. 권장 사이즈 300×300px 이상, 정사각형에 가까운 이미지.</p>
+      <div id="keywordBannerList" style="display:flex; flex-direction:column; gap:14px;"></div>
+      <button id="addKeywordBannerBtn" class="ghost" style="margin-top:12px;">+ 키워드 배너 추가</button>
+    </section>
+
     <div class="toolbar">
       <select id="sortSelect">
         <option value="reports">신고 많은 순</option>
@@ -291,6 +298,119 @@ document.querySelectorAll(".banner-slot").forEach((slotEl) => {
     await setDoc(ref, { banners, updatedAt: Date.now() });
     statusEl.textContent = "배너를 제거했어요.";
   });
+});
+
+// ── 키워드 추천 배너 ─────────────────────────────────────
+const kbRef = doc(db, "config", "keywordBanners");
+let kbItems = []; // Firestore에 저장된 항목 {keyword, imageUrl, link}
+let kbDrafts = []; // 아직 저장 안 한 새 항목(로컬에만 존재), {id, keyword, link, imageUrl:null}
+let kbDraftSeq = 0;
+const kbFiles = {}; // rowKey -> File (rowKey는 "s{i}" 저장된 항목 또는 "d{id}" 드래프트)
+
+function kbEscape(s) {
+  return String(s || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+function kbRowHtml(rowKey, data) {
+  return `
+  <div class="banner-slot kb-row" data-row-key="${rowKey}" style="border:1px dashed #D8CFB2; border-radius:10px; padding:12px;">
+    <input class="kbKeyword" type="text" placeholder="키워드 (예: 블루베리)" value="${kbEscape(data.keyword)}" style="width:100%; margin-bottom:8px; font-weight:700;" />
+    <div class="kbPreviewWrap" style="display:${data.imageUrl ? "block" : "none"}; margin-bottom:8px;">
+      <img class="kbPreview" src="${data.imageUrl || ""}" style="width:120px; height:120px; object-fit:cover; border-radius:8px; border:1.5px solid #D8CFB2;" loading="lazy" decoding="async" />
+    </div>
+    <input class="kbFile" type="file" accept="image/*" style="font-size:13px; margin-bottom:8px;" />
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <input class="kbLink" type="text" placeholder="클릭 시 이동할 링크" value="${kbEscape(data.link)}" style="flex:1; min-width:160px;" />
+      <button class="kbSaveBtn">저장</button>
+      <button class="kbDeleteBtn ghost">삭제</button>
+    </div>
+    <p class="kbStatus" style="font-size:11px; color:#8A8064; margin-top:6px;"></p>
+  </div>`;
+}
+
+function renderKeywordBannerList() {
+  const listEl = el("#keywordBannerList");
+  const savedRows = kbItems.map((item, i) => ({ rowKey: `s${i}`, data: item }));
+  const draftRows = kbDrafts.map((d) => ({ rowKey: `d${d.id}`, data: d }));
+  listEl.innerHTML = [...savedRows, ...draftRows].map((r) => kbRowHtml(r.rowKey, r.data)).join("")
+    || `<p style="font-size:12px; color:#8A8064;">등록된 키워드 배너가 없어요.</p>`;
+
+  listEl.querySelectorAll(".kb-row").forEach((rowEl) => {
+    const rowKey = rowEl.dataset.rowKey;
+    const fileInput = rowEl.querySelector(".kbFile");
+    const saveBtn = rowEl.querySelector(".kbSaveBtn");
+    const deleteBtn = rowEl.querySelector(".kbDeleteBtn");
+    const keywordInput = rowEl.querySelector(".kbKeyword");
+    const linkInput = rowEl.querySelector(".kbLink");
+    const statusEl = rowEl.querySelector(".kbStatus");
+
+    fileInput.addEventListener("change", (e) => { kbFiles[rowKey] = e.target.files[0] || null; });
+
+    saveBtn.addEventListener("click", async () => {
+      const keyword = keywordInput.value.trim();
+      const link = linkInput.value.trim();
+      const file = kbFiles[rowKey];
+      const isDraft = rowKey.startsWith("d");
+      const existing = isDraft
+        ? kbDrafts.find((d) => `d${d.id}` === rowKey)
+        : kbItems[Number(rowKey.slice(1))];
+
+      if (!keyword) { statusEl.textContent = "키워드를 입력해주세요."; return; }
+      if (!file && !(existing && existing.imageUrl)) { statusEl.textContent = "이미지를 선택해주세요."; return; }
+
+      statusEl.textContent = "저장 중...";
+      try {
+        let imageUrl = existing && existing.imageUrl ? existing.imageUrl : null;
+        if (file) {
+          const uploadBlob = await resizeImageForUpload(file, 800, 0.85);
+          const path = `keywordBanners/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+          const fileRef = storageRef(storage, path);
+          await uploadBytes(fileRef, uploadBlob, { contentType: "image/jpeg" });
+          imageUrl = await getDownloadURL(fileRef);
+        }
+        const snap = await getDoc(kbRef);
+        const currentItems = (snap.exists() && Array.isArray(snap.data().items)) ? [...snap.data().items] : [];
+        const newItem = { keyword, link, imageUrl };
+        if (isDraft) {
+          currentItems.push(newItem);
+        } else {
+          currentItems[Number(rowKey.slice(1))] = newItem;
+        }
+        await setDoc(kbRef, { items: currentItems, updatedAt: Date.now() });
+        if (isDraft) kbDrafts = kbDrafts.filter((d) => `d${d.id}` !== rowKey);
+        delete kbFiles[rowKey];
+        statusEl.textContent = "저장됐어요.";
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "저장 실패했어요. 다시 시도해주세요.";
+      }
+    });
+
+    deleteBtn.addEventListener("click", async () => {
+      const isDraft = rowKey.startsWith("d");
+      if (isDraft) {
+        kbDrafts = kbDrafts.filter((d) => `d${d.id}` !== rowKey);
+        renderKeywordBannerList();
+        return;
+      }
+      if (!confirm("이 키워드 배너를 삭제할까요?")) return;
+      const snap = await getDoc(kbRef);
+      const currentItems = (snap.exists() && Array.isArray(snap.data().items)) ? [...snap.data().items] : [];
+      currentItems.splice(Number(rowKey.slice(1)), 1);
+      await setDoc(kbRef, { items: currentItems, updatedAt: Date.now() });
+    });
+  });
+}
+
+onSnapshot(kbRef, (snap) => {
+  kbItems = (snap.exists() && Array.isArray(snap.data().items)) ? snap.data().items : [];
+  renderKeywordBannerList();
+});
+
+el("#addKeywordBannerBtn").addEventListener("click", () => {
+  kbDraftSeq += 1;
+  kbDrafts.push({ id: kbDraftSeq, keyword: "", link: "", imageUrl: null });
+  renderKeywordBannerList();
 });
 
 el("#sortSelect").addEventListener("change", (e) => { sortMode = e.target.value; render(); });
