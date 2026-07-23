@@ -810,12 +810,6 @@ function dealCard(d) {
     ${tagChips ? `<div class="flex flex-wrap gap-1">${tagChips}</div>` : ""}
     <div class="flex flex-wrap gap-1.5">${participantChips}</div>
 
-    <div class="flex items-center gap-2 text-[11px] flex-wrap">
-      <span class="text-[#8A8064]">지금 바로 사고 싶다면?</span>
-      <a href="${coupangSearchUrl(d.product)}" target="_blank" rel="noopener noreferrer nofollow sponsored" class="underline text-accent2 font-semibold">쿠팡에서 보기</a>
-      <a href="${naverSearchUrl(d.product)}" target="_blank" rel="noopener noreferrer nofollow sponsored" class="underline text-accent2 font-semibold">네이버에서 보기</a>
-    </div>
-
     ${ctaBlock}
 
     <button class="report-btn text-[10px] text-[#B9AE8C] hover:text-accent self-end underline decoration-dotted" data-id="${d.id}">신고하기</button>
