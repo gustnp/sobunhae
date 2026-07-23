@@ -229,6 +229,37 @@ async function resizeImageForUpload(file, maxDim = 1280, quality = 0.82) {
 }
 
 const TAGS = ["신선/냉동", "간식/과자", "생활용품", "유아/키즈", "건강/영양", "반려동물", "주방/가전", "기타"];
+
+// ---------- 쿠팡/네이버 쇼핑 연동 ----------
+// 지금은 계정 없이도 바로 동작하는 일반 검색 링크예요 (수수료 없음).
+// 나중에 쿠팡 파트너스 / 네이버 쇼핑 커넥트 가입 후, 아래 두 함수의 URL을
+// 실제 발급받은 제휴 딥링크로 교체하면 수수료가 붙어요.
+// (제휴 링크로 바꾸면 "이 링크는 쿠팡 파트너스 활동의 일환으로 일정액의
+// 수수료를 제공받습니다" 같은 고지 문구를 카드에 표시해야 해요 — 공정위 고시 의무사항)
+function coupangSearchUrl(keyword) {
+  return `https://www.coupang.com/np/search?q=${encodeURIComponent(keyword)}`;
+}
+function naverSearchUrl(keyword) {
+  return `https://search.shopping.naver.com/search/all?query=${encodeURIComponent(keyword)}`;
+}
+// 지금 등록된 소분 글들의 태그를 세어 가장 많이 나오는 카테고리 n개를 반환
+function topCategories(n = 1) {
+  const counts = {};
+  deals.forEach((d) => (d.tags || []).forEach((t) => { counts[t] = (counts[t] || 0) + 1; }));
+  return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, n).map(([tag]) => tag);
+}
+function trendingBanner() {
+  const [topTag] = topCategories(1);
+  if (!topTag) return "";
+  return `
+  <div class="rounded-xl p-3 mb-4 flex items-center justify-between gap-2 flex-wrap bg-white border border-kraft">
+    <p class="text-xs text-[#6E6650]">요즘 우리 동네에서 <strong class="text-ink">#${topTag}</strong> 소분이 제일 많아요</p>
+    <div class="flex gap-3 shrink-0">
+      <a href="${coupangSearchUrl(topTag)}" target="_blank" rel="noopener noreferrer nofollow sponsored" class="text-[11px] font-semibold underline text-accent2">쿠팡에서 보기</a>
+      <a href="${naverSearchUrl(topTag)}" target="_blank" rel="noopener noreferrer nofollow sponsored" class="text-[11px] font-semibold underline text-accent2">네이버에서 보기</a>
+    </div>
+  </div>`;
+}
 const won = (n) => `${Math.round(n).toLocaleString("ko-KR")}원`;
 const wonNum = (n) => Math.round(n).toLocaleString("ko-KR");
 const daysSince = (ts) => Math.floor((Date.now() - (ts?.toMillis?.() ?? ts ?? Date.now())) / 86400000);
@@ -739,6 +770,12 @@ function dealCard(d) {
     ${tagChips ? `<div class="flex flex-wrap gap-1">${tagChips}</div>` : ""}
     <div class="flex flex-wrap gap-1.5">${participantChips}</div>
 
+    <div class="flex items-center gap-2 text-[11px] flex-wrap">
+      <span class="text-[#8A8064]">지금 바로 사고 싶다면?</span>
+      <a href="${coupangSearchUrl(d.product)}" target="_blank" rel="noopener noreferrer nofollow sponsored" class="underline text-accent2 font-semibold">쿠팡에서 보기</a>
+      <a href="${naverSearchUrl(d.product)}" target="_blank" rel="noopener noreferrer nofollow sponsored" class="underline text-accent2 font-semibold">네이버에서 보기</a>
+    </div>
+
     ${ctaBlock}
 
     <button class="report-btn text-[10px] text-[#B9AE8C] hover:text-accent self-end underline decoration-dotted" data-id="${d.id}">신고하기</button>
@@ -835,7 +872,7 @@ function render() {
     return;
   }
   statusEl.classList.add("hidden");
-  feedEl.innerHTML = filtered.map((d, i) => dealCard(d) + (i === 2 ? adSlot() : "")).join("");
+  feedEl.innerHTML = trendingBanner() + filtered.map((d, i) => dealCard(d) + (i === 2 ? adSlot() : "")).join("");
 
   feedEl.querySelectorAll(".join-btn").forEach((btn) => btn.addEventListener("click", async () => {
     const id = btn.dataset.id;
