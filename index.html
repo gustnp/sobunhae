@@ -409,15 +409,16 @@ function locOf(d) {
 // (로그인이 없음) 완벽한 신뢰 지표는 아니지만, 같은 닉네임을 계속 쓰는 사람에게는
 // 참고할 만한 신호가 됨.
 function hostTrust(nickname) {
-  let good = 0, bad = 0;
+  let good = 0, bad = 0, count = 0;
   deals.forEach((d) => {
     const host = d.participants && d.participants[0];
     if (host && host.nickname === nickname) {
       good += d.reviewGood || 0;
       bad += d.reviewBad || 0;
+      count += 1;
     }
   });
-  return { good, bad };
+  return { good, bad, count };
 }
 
 // 최근 7일 내 등록된 소분을 상품명 기준으로 집계해 인기 TOP N을 뽑음.
@@ -820,17 +821,20 @@ function dealCard(d) {
   const watchBadge = matchesWatch(d)
     ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent2 text-white">⭐ 관심 키워드</span>` : "";
 
+  // 호스트 칩은 탭(클릭)하면 후기 요약을 펼쳐 보여줌 — 마우스 호버는 모바일에서 동작하지 않으니
+  // 클릭/탭 둘 다 되는 방식으로 통일.
   const participantChips = d.participants.map((p, i) => {
     const isHost = i === 0;
-    const cls = isHost
-      ? "text-[11px] px-2 py-0.5 rounded-full bg-accent2 text-white font-semibold"
-      : "text-[11px] px-2 py-0.5 rounded-full bg-bg border border-kraft text-ink";
-    let trustSuffix = "";
-    if (isHost) {
-      const { good, bad } = hostTrust(p.nickname);
-      if (good > 0 || bad > 0) trustSuffix = ` · 👍${good}${bad > 0 ? ` ⚠️${bad}` : ""}`;
+    const label = `${isHost ? "호스트 · " : ""}${p.nickname}${unitsOf(p) > 1 ? ` ×${unitsOf(p)}` : ""}`;
+    if (!isHost) {
+      return `<span class="text-[11px] px-2 py-0.5 rounded-full bg-bg border border-kraft text-ink">${label}</span>`;
     }
-    return `<span class="${cls}">${isHost ? "호스트 · " : ""}${p.nickname}${unitsOf(p) > 1 ? ` ×${unitsOf(p)}` : ""}${trustSuffix}</span>`;
+    const { good, bad, count } = hostTrust(p.nickname);
+    const trustSuffix = (good > 0 || bad > 0) ? ` · 👍${good}${bad > 0 ? ` ⚠️${bad}` : ""}` : "";
+    const detail = (good > 0 || bad > 0)
+      ? `이 닉네임으로 진행한 소분 ${count}건 · 원활했어요 ${good}건 · 문제 있었어요 ${bad}건`
+      : `이 닉네임으로 진행한 소분 ${count}건 · 아직 후기가 없어요`;
+    return `<button type="button" class="host-trust-btn text-[11px] px-2 py-0.5 rounded-full bg-accent2 text-white font-semibold" data-detail="${detail.replace(/"/g, "&quot;")}">${label}${trustSuffix}</button>`;
   }).join("");
 
   const unitOptions = Array.from({ length: Math.max(1, remaining) }).map((_, i) =>
@@ -910,7 +914,10 @@ function dealCard(d) {
     </div>
 
     ${(tagChips || watchBadge) ? `<div class="flex flex-wrap gap-1">${watchBadge}${tagChips}</div>` : ""}
-    ${(matched || completed) ? "" : `<div class="flex flex-wrap gap-1.5">${participantChips}</div>`}
+    ${(matched || completed) ? "" : `<div class="participant-row flex flex-col gap-1">
+      <div class="flex flex-wrap gap-1.5">${participantChips}</div>
+      <p class="host-detail hidden text-[11px] text-[#6E6650]"></p>
+    </div>`}
 
     ${ctaBlock}
 
@@ -1085,6 +1092,12 @@ function render() {
   feedEl.querySelectorAll(".mark-received-btn").forEach((btn) => btn.addEventListener("click", () => markReceived(btn.dataset.id, btn.dataset.nickname)));
   feedEl.querySelectorAll(".review-btn").forEach((btn) => btn.addEventListener("click", () => addReview(btn.dataset.id, btn.dataset.type)));
   feedEl.querySelectorAll(".report-btn").forEach((btn) => btn.addEventListener("click", () => reportDeal(btn.dataset.id)));
+  feedEl.querySelectorAll(".host-trust-btn").forEach((btn) => btn.addEventListener("click", () => {
+    const detailEl = btn.closest(".participant-row")?.querySelector(".host-detail");
+    if (!detailEl) return;
+    detailEl.textContent = btn.dataset.detail;
+    detailEl.classList.toggle("hidden");
+  }));
 }
 </script>
 </body>
