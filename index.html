@@ -21,7 +21,7 @@
   .division-seg { flex: 1; height: 14px; border-radius: 3px; border: 1.5px solid #B9AE8C; transition: background 200ms ease; }
   .division-seg.filled { background: #E8542E; border-color: transparent; }
   .division-seg.filled.matched { background: #2F6F5E; }
-  .ad-sticker { transform: rotate(-1.4deg); }
+  .ad-sticker { }
   .card-stripe-open { border-left: 6px solid #E8542E; }
   .card-stripe-matched { border-left: 6px solid #2F6F5E; }
   .card-stripe-completed { border-left: 6px solid #8A8064; }
@@ -808,7 +808,7 @@ function dealCard(d) {
     </div>
 
     ${tagChips ? `<div class="flex flex-wrap gap-1">${tagChips}</div>` : ""}
-    <div class="flex flex-wrap gap-1.5">${participantChips}</div>
+    ${(matched || completed) ? "" : `<div class="flex flex-wrap gap-1.5">${participantChips}</div>`}
 
     ${ctaBlock}
 
