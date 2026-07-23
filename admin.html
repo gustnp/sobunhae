@@ -64,18 +64,62 @@
   </header>
   <main>
     <section style="background:#fff; border:1.5px solid #D8CFB2; border-radius:12px; padding:16px; margin-bottom:20px;">
-      <p style="font-weight:800; font-size:14px; margin:0 0 4px;">상단 배너 관리</p>
-      <p style="font-size:11px; color:#8A8064; margin:0 0 10px;">권장 사이즈 1200×600px (2:1 비율) · 배너를 올리면 홈 상단의 실시간 캐러셀 대신 이 이미지가 표시돼요. 지우면 다시 캐러셀로 돌아가요.</p>
-      <div id="bannerPreviewWrap" style="display:none; margin-bottom:10px;">
-        <img id="bannerPreview" style="width:100%; max-width:400px; aspect-ratio:2/1; object-fit:cover; border-radius:8px; border:1.5px solid #D8CFB2;" loading="lazy" decoding="async" />
+      <p style="font-weight:800; font-size:14px; margin:0 0 4px;">상단 배너 관리 (최대 4개)</p>
+      <p style="font-size:11px; color:#8A8064; margin:0 0 10px;">권장 사이즈 1200×600px (2:1 비율) · 1개 이상 있으면 홈 상단에서 배너들이 순서대로 돌아가며 보여요. 전부 지우면 실시간 캐러셀로 돌아가요.</p>
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div class="banner-slot" data-idx="0" style="border:1px dashed #D8CFB2; border-radius:10px; padding:12px;">
+          <p style="font-size:12px; font-weight:700; margin:0 0 8px;">배너 1</p>
+          <div class="bannerPreviewWrap" style="display:none; margin-bottom:8px;">
+            <img class="bannerPreview" style="width:100%; max-width:320px; aspect-ratio:2/1; object-fit:cover; border-radius:8px; border:1.5px solid #D8CFB2;" loading="lazy" decoding="async" />
+          </div>
+          <input class="bannerFile" type="file" accept="image/*" style="font-size:13px; margin-bottom:8px;" />
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <input class="bannerLink" type="text" placeholder="클릭 시 이동할 링크 (선택)" style="flex:1; min-width:160px;" />
+            <button class="bannerUploadBtn">저장</button>
+            <button class="bannerRemoveBtn ghost">제거</button>
+          </div>
+          <p class="bannerStatus" style="font-size:11px; color:#8A8064; margin-top:6px;"></p>
+        </div>
+        <div class="banner-slot" data-idx="1" style="border:1px dashed #D8CFB2; border-radius:10px; padding:12px;">
+          <p style="font-size:12px; font-weight:700; margin:0 0 8px;">배너 2</p>
+          <div class="bannerPreviewWrap" style="display:none; margin-bottom:8px;">
+            <img class="bannerPreview" style="width:100%; max-width:320px; aspect-ratio:2/1; object-fit:cover; border-radius:8px; border:1.5px solid #D8CFB2;" loading="lazy" decoding="async" />
+          </div>
+          <input class="bannerFile" type="file" accept="image/*" style="font-size:13px; margin-bottom:8px;" />
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <input class="bannerLink" type="text" placeholder="클릭 시 이동할 링크 (선택)" style="flex:1; min-width:160px;" />
+            <button class="bannerUploadBtn">저장</button>
+            <button class="bannerRemoveBtn ghost">제거</button>
+          </div>
+          <p class="bannerStatus" style="font-size:11px; color:#8A8064; margin-top:6px;"></p>
+        </div>
+        <div class="banner-slot" data-idx="2" style="border:1px dashed #D8CFB2; border-radius:10px; padding:12px;">
+          <p style="font-size:12px; font-weight:700; margin:0 0 8px;">배너 3</p>
+          <div class="bannerPreviewWrap" style="display:none; margin-bottom:8px;">
+            <img class="bannerPreview" style="width:100%; max-width:320px; aspect-ratio:2/1; object-fit:cover; border-radius:8px; border:1.5px solid #D8CFB2;" loading="lazy" decoding="async" />
+          </div>
+          <input class="bannerFile" type="file" accept="image/*" style="font-size:13px; margin-bottom:8px;" />
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <input class="bannerLink" type="text" placeholder="클릭 시 이동할 링크 (선택)" style="flex:1; min-width:160px;" />
+            <button class="bannerUploadBtn">저장</button>
+            <button class="bannerRemoveBtn ghost">제거</button>
+          </div>
+          <p class="bannerStatus" style="font-size:11px; color:#8A8064; margin-top:6px;"></p>
+        </div>
+        <div class="banner-slot" data-idx="3" style="border:1px dashed #D8CFB2; border-radius:10px; padding:12px;">
+          <p style="font-size:12px; font-weight:700; margin:0 0 8px;">배너 4</p>
+          <div class="bannerPreviewWrap" style="display:none; margin-bottom:8px;">
+            <img class="bannerPreview" style="width:100%; max-width:320px; aspect-ratio:2/1; object-fit:cover; border-radius:8px; border:1.5px solid #D8CFB2;" loading="lazy" decoding="async" />
+          </div>
+          <input class="bannerFile" type="file" accept="image/*" style="font-size:13px; margin-bottom:8px;" />
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <input class="bannerLink" type="text" placeholder="클릭 시 이동할 링크 (선택)" style="flex:1; min-width:160px;" />
+            <button class="bannerUploadBtn">저장</button>
+            <button class="bannerRemoveBtn ghost">제거</button>
+          </div>
+          <p class="bannerStatus" style="font-size:11px; color:#8A8064; margin-top:6px;"></p>
+        </div>
       </div>
-      <input id="bannerFile" type="file" accept="image/*" style="font-size:13px; margin-bottom:8px;" />
-      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-        <input id="bannerLink" type="text" placeholder="클릭 시 이동할 링크 (선택)" style="flex:1; min-width:180px;" />
-        <button id="bannerUploadBtn">배너 저장</button>
-        <button id="bannerRemoveBtn" class="ghost">배너 제거</button>
-      </div>
-      <p id="bannerStatus" style="font-size:11px; color:#8A8064; margin-top:6px;"></p>
     </section>
 
     <div class="toolbar">
@@ -149,15 +193,21 @@ function initFirebase() {
   });
 
   onSnapshot(doc(db, "config", "banner"), (snap) => {
-    if (snap.exists()) {
-      const data = snap.data();
-      el("#bannerPreview").src = data.imageUrl;
-      el("#bannerPreviewWrap").style.display = "block";
-      el("#bannerLink").value = data.link || "";
-    } else {
-      el("#bannerPreviewWrap").style.display = "none";
-      el("#bannerLink").value = "";
-    }
+    const banners = (snap.exists() && Array.isArray(snap.data().banners)) ? snap.data().banners : [];
+    document.querySelectorAll(".banner-slot").forEach((slotEl, i) => {
+      const b = banners[i];
+      const previewWrap = slotEl.querySelector(".bannerPreviewWrap");
+      const preview = slotEl.querySelector(".bannerPreview");
+      const linkInput = slotEl.querySelector(".bannerLink");
+      if (b && b.imageUrl) {
+        preview.src = b.imageUrl;
+        previewWrap.style.display = "block";
+        linkInput.value = b.link || "";
+      } else {
+        previewWrap.style.display = "none";
+        linkInput.value = "";
+      }
+    });
   });
 }
 
@@ -182,38 +232,58 @@ async function resizeImageForUpload(file, maxDim = 1600, quality = 0.85) {
     return file;
   }
 }
-let bannerFile = null;
-el("#bannerFile").addEventListener("change", (e) => { bannerFile = e.target.files[0] || null; });
+const bannerFiles = {};
 
-el("#bannerUploadBtn").addEventListener("click", async () => {
-  const statusEl = el("#bannerStatus");
-  if (!bannerFile) {
-    statusEl.textContent = "먼저 이미지를 선택해주세요.";
-    return;
-  }
-  statusEl.textContent = "업로드 중...";
-  try {
-    const uploadBlob = await resizeImageForUpload(bannerFile);
-    const path = `banner/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
-    const fileRef = storageRef(storage, path);
-    await uploadBytes(fileRef, uploadBlob, { contentType: "image/jpeg" });
-    const imageUrl = await getDownloadURL(fileRef);
-    await setDoc(doc(db, "config", "banner"), {
-      imageUrl, link: el("#bannerLink").value.trim(), updatedAt: Date.now(),
-    });
-    statusEl.textContent = "배너가 저장됐어요.";
-    bannerFile = null;
-    el("#bannerFile").value = "";
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = "업로드 실패했어요. 다시 시도해주세요.";
-  }
-});
+async function readBannersArray() {
+  const ref = doc(db, "config", "banner");
+  const snap = await getDoc(ref);
+  const banners = (snap.exists() && Array.isArray(snap.data().banners)) ? [...snap.data().banners] : [];
+  while (banners.length < 4) banners.push(null);
+  return { ref, banners };
+}
 
-el("#bannerRemoveBtn").addEventListener("click", async () => {
-  if (!confirm("배너를 제거할까요? 홈 화면은 다시 실시간 캐러셀로 돌아가요.")) return;
-  await deleteDoc(doc(db, "config", "banner"));
-  el("#bannerStatus").textContent = "배너를 제거했어요.";
+document.querySelectorAll(".banner-slot").forEach((slotEl) => {
+  const idx = Number(slotEl.dataset.idx);
+  const fileInput = slotEl.querySelector(".bannerFile");
+  const uploadBtn = slotEl.querySelector(".bannerUploadBtn");
+  const removeBtn = slotEl.querySelector(".bannerRemoveBtn");
+  const linkInput = slotEl.querySelector(".bannerLink");
+  const statusEl = slotEl.querySelector(".bannerStatus");
+
+  fileInput.addEventListener("change", (e) => { bannerFiles[idx] = e.target.files[0] || null; });
+
+  uploadBtn.addEventListener("click", async () => {
+    const file = bannerFiles[idx];
+    if (!file) {
+      statusEl.textContent = "먼저 이미지를 선택해주세요.";
+      return;
+    }
+    statusEl.textContent = "업로드 중...";
+    try {
+      const uploadBlob = await resizeImageForUpload(file);
+      const path = `banner/${idx}_${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+      const fileRef = storageRef(storage, path);
+      await uploadBytes(fileRef, uploadBlob, { contentType: "image/jpeg" });
+      const imageUrl = await getDownloadURL(fileRef);
+      const { ref, banners } = await readBannersArray();
+      banners[idx] = { imageUrl, link: linkInput.value.trim() };
+      await setDoc(ref, { banners, updatedAt: Date.now() });
+      statusEl.textContent = "배너가 저장됐어요.";
+      bannerFiles[idx] = null;
+      fileInput.value = "";
+    } catch (err) {
+      console.error(err);
+      statusEl.textContent = "업로드 실패했어요. 다시 시도해주세요.";
+    }
+  });
+
+  removeBtn.addEventListener("click", async () => {
+    if (!confirm("이 배너를 제거할까요?")) return;
+    const { ref, banners } = await readBannersArray();
+    banners[idx] = null;
+    await setDoc(ref, { banners, updatedAt: Date.now() });
+    statusEl.textContent = "배너를 제거했어요.";
+  });
 });
 
 el("#sortSelect").addEventListener("change", (e) => { sortMode = e.target.value; render(); });
