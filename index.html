@@ -389,7 +389,11 @@ function startListening() {
 if (firebaseReady) {
   seedIfEmpty().finally(startListening);
   onSnapshot(doc(db, "config", "banner"), (snap) => {
-    const rawBanners = (snap.exists() && Array.isArray(snap.data().banners)) ? snap.data().banners : [];
+    const data = snap.exists() ? snap.data() : {};
+    // banners 배열이 없으면 예전 단일 배너 구조({imageUrl, link})를 1개짜리 배열로 취급 (마이그레이션 호환)
+    const rawBanners = Array.isArray(data.banners)
+      ? data.banners
+      : (data.imageUrl ? [{ imageUrl: data.imageUrl, link: data.link }] : []);
     banners = rawBanners.filter((b) => b && b.imageUrl);
     bannerIndex = 0;
     if (bannerTimer) { clearInterval(bannerTimer); bannerTimer = null; }

@@ -193,7 +193,11 @@ function initFirebase() {
   });
 
   onSnapshot(doc(db, "config", "banner"), (snap) => {
-    const banners = (snap.exists() && Array.isArray(snap.data().banners)) ? snap.data().banners : [];
+    const data = snap.exists() ? snap.data() : {};
+    // banners 배열이 없으면 예전 단일 배너 구조({imageUrl, link})를 1개짜리 배열로 취급 (마이그레이션 호환)
+    const banners = Array.isArray(data.banners)
+      ? data.banners
+      : (data.imageUrl ? [{ imageUrl: data.imageUrl, link: data.link }] : []);
     document.querySelectorAll(".banner-slot").forEach((slotEl, i) => {
       const b = banners[i];
       const previewWrap = slotEl.querySelector(".bannerPreviewWrap");
@@ -237,7 +241,10 @@ const bannerFiles = {};
 async function readBannersArray() {
   const ref = doc(db, "config", "banner");
   const snap = await getDoc(ref);
-  const banners = (snap.exists() && Array.isArray(snap.data().banners)) ? [...snap.data().banners] : [];
+  const data = snap.exists() ? snap.data() : {};
+  const banners = Array.isArray(data.banners)
+    ? [...data.banners]
+    : (data.imageUrl ? [{ imageUrl: data.imageUrl, link: data.link }] : []);
   while (banners.length < 4) banners.push(null);
   return { ref, banners };
 }
