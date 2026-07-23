@@ -267,7 +267,28 @@ const el = (sel) => document.querySelector(sel);
 
 let app, db, analytics, storage, deals = [];
 let firebaseReady = false;
-let statusFilter = "all", tagFilter = "all", joinedIds = new Set();
+let statusFilter = "all", tagFilter = "all";
+
+// 기기(브라우저) 기준으로 "내가 참여한 글"을 기억해두는 저장소.
+// 로그인이 없어서 진짜 신원 확인은 아니고, 새로고침/재방문에도 내 참여 상태를
+// 알아보게 해주는 최소한의 장치예요. 브라우저 데이터 지우거나 다른 기기로
+// 오면 못 알아봐요 — 그 이상은 로그인 없이는 어렵습니다.
+function loadJoinedMap() {
+  try { return JSON.parse(localStorage.getItem("sobunhae_joined") || "{}"); }
+  catch (e) { return {}; }
+}
+function saveJoinedMap() {
+  try { localStorage.setItem("sobunhae_joined", JSON.stringify(joinedMap)); } catch (e) {}
+}
+let joinedMap = loadJoinedMap(); // { [dealId]: myNickname }
+
+function loadReviewedIds() {
+  try { return new Set(JSON.parse(localStorage.getItem("sobunhae_reviewed") || "[]")); }
+  catch (e) { return new Set(); }
+}
+function saveReviewedIds() {
+  try { localStorage.setItem("sobunhae_reviewed", JSON.stringify([...reviewedIds])); } catch (e) {}
+}
 let selectedTags = [];
 let currentView = "list";
 let heroIndex = 0;
@@ -501,7 +522,8 @@ el("#submitFormBtn").addEventListener("click", async () => {
   };
   const ref = await addDoc(collection(db, "deals"), deal);
   if (analytics) logEvent(analytics, "deal_created", { product: deal.product, target_count: deal.targetCount });
-  joinedIds.add(ref.id);
+  joinedMap[ref.id] = nickname;
+  saveJoinedMap();
   selectedTags = [];
   formLocation = null;
   el("#f_locSearch").value = "";
@@ -532,7 +554,8 @@ async function joinDeal(id, nickname, units) {
     const newFilled = filled + take;
     tx.update(ref, { participants, status: newFilled >= data.targetCount ? "matched" : "open" });
   });
-  joinedIds.add(id);
+  joinedMap[id] = nickname;
+  saveJoinedMap();
   if (analytics) logEvent(analytics, "deal_joined", { deal_id: id });
 }
 
@@ -542,6 +565,12 @@ async function confirmPrice(id) {
 
 /* ---------- 매칭 완료 이후 프로세스: 수령 확인 → 완료 → 후기 / 신고 ---------- */
 async function markReceived(id, nickname) {
+  // 이 기기가 실제로 그 글에 그 닉네임으로 참여한 게 맞는지 먼저 확인 —
+  // 아니면 남의 이름으로 "받음"을 눌러서 거래를 임의로 완료 처리할 수 있었음.
+  if (joinedMap[id] !== nickname) {
+    alert("본인 참여 내역에서만 수령 확인을 할 수 있어요.");
+    return;
+  }
   const ref = doc(db, "deals", id);
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);
@@ -554,10 +583,15 @@ async function markReceived(id, nickname) {
   });
 }
 
-const reviewedIds = new Set();
+let reviewedIds = loadReviewedIds();
 async function addReview(id, type) {
   if (reviewedIds.has(id)) return;
+  if (!joinedMap[id]) {
+    alert("이 소분에 참여했던 분만 후기를 남길 수 있어요.");
+    return;
+  }
   reviewedIds.add(id);
+  saveReviewedIds();
   await updateDoc(doc(db, "deals", id), { [type === "good" ? "reviewGood" : "reviewBad"]: increment(1) });
 }
 
@@ -683,7 +717,8 @@ function dealCard(d) {
   const matched = d.status === "matched";
   const completed = d.status === "completed";
   const full = remaining <= 0;
-  const alreadyIn = joinedIds.has(d.id);
+  const alreadyIn = !!joinedMap[d.id];
+  const myNickname = joinedMap[d.id] || null;
   const priceAge = daysSince(d.priceCheckedAt ?? d.createdAt);
   const stale = priceAge >= 7;
   const reportCount = d.reportCount || 0;
@@ -701,11 +736,14 @@ function dealCard(d) {
   const unitOptions = Array.from({ length: Math.max(1, remaining) }).map((_, i) =>
     `<option value="${i + 1}">${i + 1}인분</option>`).join("");
 
-  const receiptChecklist = (d.participants || []).map((p) => `
-    <button class="mark-received-btn text-xs px-2.5 py-1 rounded-full border ${p.received ? "bg-ink text-white border-ink" : "bg-white border-kraft text-[#6E6650]"}"
-      data-id="${d.id}" data-nickname="${p.nickname}">
-      ${p.nickname} ${p.received ? "받음" : "받으면 누르기"}
-    </button>`).join("");
+  const receiptChecklist = (d.participants || []).map((p) => {
+    const isMe = p.nickname === myNickname;
+    const label = `${p.nickname} ${p.received ? "받음" : isMe ? "받으면 누르기" : "대기중"}`;
+    const baseClass = `text-xs px-2.5 py-1 rounded-full border ${p.received ? "bg-ink text-white border-ink" : "bg-white border-kraft text-[#6E6650]"}`;
+    return isMe
+      ? `<button class="mark-received-btn ${baseClass}" data-id="${d.id}" data-nickname="${p.nickname}">${label}</button>`
+      : `<span class="${baseClass} inline-block ${p.received ? "" : "opacity-60"}">${label}</span>`;
+  }).join("");
 
   const ctaBlock = completed ? `
     <div class="p-3 flex flex-col gap-2 bg-white" style="border-left: 4px solid #8A8064;">
@@ -717,7 +755,7 @@ function dealCard(d) {
         <button class="review-btn text-xs font-semibold px-3 py-1.5 rounded-full border border-kraft bg-white text-accent2" data-id="${d.id}" data-type="good">원활했어요 ${d.reviewGood ? `(${d.reviewGood})` : ""}</button>
         <button class="review-btn text-xs font-semibold px-3 py-1.5 rounded-full border border-kraft bg-white text-accent" data-id="${d.id}" data-type="bad">문제 있었어요 ${d.reviewBad ? `(${d.reviewBad})` : ""}</button>
       </div>
-    </div>` : matched ? `
+    </div>` : matched ? (alreadyIn ? `
     <div class="p-3 flex flex-col gap-2 bg-white" style="border-left: 4px solid #2F6F5E;">
       <div class="flex items-center gap-2">
         <span class="ad-sticker text-[10px] font-bold px-2 py-0.5 rounded-full bg-kraft text-ink tracking-wide">인원 마감</span>
@@ -727,7 +765,9 @@ function dealCard(d) {
         ? `<a href="${d.contactLink}" target="_blank" rel="noreferrer" class="text-xs underline text-accent2 inline-block">채팅방 참여하기</a>`
         : `<p class="text-xs text-[#6E6650]">작성자가 곧 연락 방법을 공유할 거예요.</p>`}
       <div class="flex flex-wrap gap-1.5">${receiptChecklist}</div>
-    </div>` : alreadyIn ? `
+    </div>` : `
+    <div class="rounded-lg p-2.5 text-xs font-semibold text-center bg-bg text-[#8A8064]">인원이 다 찼어요 · 다음 소분을 찾아보세요</div>`
+  ) : alreadyIn ? `
     <div class="rounded-lg p-2.5 text-xs font-semibold text-center bg-bg text-accent2">참여 완료 · 남은 자리를 기다리는 중이에요</div>` : `
     <div class="flex flex-col gap-1.5">
       <div class="flex gap-2">
