@@ -541,22 +541,28 @@ function filledOf(d) {
   return (d.participants || []).reduce((sum, p) => sum + unitsOf(p), 0);
 }
 
+// 반환값: "joined" | "duplicate"(닉네임 중복) | "full"(그 사이 인원이 다 참)
 async function joinDeal(id, nickname, units) {
   const ref = doc(db, "deals", id);
+  let result = "joined";
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);
     const data = snap.data();
-    if (data.participants.some((p) => p.nickname === nickname)) return;
+    if (data.participants.some((p) => p.nickname === nickname)) { result = "duplicate"; return; }
     const filled = filledOf(data);
     const remaining = data.targetCount - filled;
+    if (remaining <= 0) { result = "full"; return; }
     const take = Math.min(Math.max(1, units), remaining);
     const participants = [...data.participants, { nickname, units: take, received: false }];
     const newFilled = filled + take;
     tx.update(ref, { participants, status: newFilled >= data.targetCount ? "matched" : "open" });
   });
-  joinedMap[id] = nickname;
-  saveJoinedMap();
-  if (analytics) logEvent(analytics, "deal_joined", { deal_id: id });
+  if (result === "joined") {
+    joinedMap[id] = nickname;
+    saveJoinedMap();
+    if (analytics) logEvent(analytics, "deal_joined", { deal_id: id });
+  }
+  return result;
 }
 
 async function confirmPrice(id) {
@@ -730,8 +736,13 @@ function dealCard(d) {
   const tagChips = (d.tags || []).map((t) =>
     `<span class="text-[10px] px-2 py-0.5 rounded-full border border-kraft text-[#6E6650]">#${t}</span>`).join("");
 
-  const participantChips = d.participants.map((p) =>
-    `<span class="text-[11px] px-2 py-0.5 rounded-full bg-bg border border-kraft text-ink">${p.nickname}${unitsOf(p) > 1 ? ` ×${unitsOf(p)}` : ""}</span>`).join("");
+  const participantChips = d.participants.map((p, i) => {
+    const isHost = i === 0;
+    const cls = isHost
+      ? "text-[11px] px-2 py-0.5 rounded-full bg-accent2 text-white font-semibold"
+      : "text-[11px] px-2 py-0.5 rounded-full bg-bg border border-kraft text-ink";
+    return `<span class="${cls}">${isHost ? "주최 · " : ""}${p.nickname}${unitsOf(p) > 1 ? ` ×${unitsOf(p)}` : ""}</span>`;
+  }).join("");
 
   const unitOptions = Array.from({ length: Math.max(1, remaining) }).map((_, i) =>
     `<option value="${i + 1}">${i + 1}인분</option>`).join("");
@@ -916,8 +927,18 @@ function render() {
     const nickname = input.value.trim();
     const units = Number(unitsSelect.value) || 1;
     if (!nickname) { errorP.textContent = "닉네임을 입력해야 참여할 수 있어요."; errorP.classList.remove("hidden"); return; }
+    errorP.classList.add("hidden");
     btn.textContent = "참여 중..."; btn.disabled = true;
-    await joinDeal(id, nickname, units);
+    const result = await joinDeal(id, nickname, units);
+    if (result === "duplicate") {
+      errorP.textContent = "이미 이 글에서 쓰이고 있는 닉네임이에요 — 다른 닉네임으로 다시 시도해주세요.";
+      errorP.classList.remove("hidden");
+      btn.textContent = "참여하기"; btn.disabled = false;
+    } else if (result === "full") {
+      errorP.textContent = "방금 다른 분이 참여해서 인원이 다 찼어요.";
+      errorP.classList.remove("hidden");
+      btn.textContent = "참여하기"; btn.disabled = false;
+    }
   }));
   feedEl.querySelectorAll(".confirm-price-btn").forEach((btn) => btn.addEventListener("click", () => confirmPrice(btn.dataset.id)));
   feedEl.querySelectorAll(".mark-received-btn").forEach((btn) => btn.addEventListener("click", () => markReceived(btn.dataset.id, btn.dataset.nickname)));
