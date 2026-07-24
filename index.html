@@ -101,7 +101,7 @@
 <div id="trendingBar" class="max-w-2xl mx-auto px-5 mt-3 flex items-center gap-1.5 flex-wrap hidden"></div>
 
 <!-- 관심 키워드: 계정/알림 없이도, 재방문 시 관심 상품을 눈에 띄게 -->
-<div class="max-w-2xl mx-auto px-5 mt-2 flex items-center gap-1.5 flex-wrap">
+<div class="max-w-2xl mx-auto px-5 mt-4 flex items-center gap-1.5 flex-wrap">
   <span class="text-xs text-[#8A8064] whitespace-nowrap">⭐ 관심 키워드</span>
   <div id="watchChips" class="flex items-center gap-1.5 flex-wrap"></div>
   <input id="watchInput" placeholder="키워드 추가 후 Enter" maxlength="12"
@@ -464,11 +464,21 @@ function hostTrust(nickname) {
   return { good, bad, count };
 }
 
+// productName이 있으면 그대로 쓰고, 없는 옛 글(합성 문자열 product)은
+// 끝에 붙은 용량/무게/수량 표기(1.36kg, 12팩, (100매x10) 등)를 지워서
+// 같은 상품이 중량 차이로 따로 집계되지 않게 함.
+function baseProductName(d) {
+  if (d.productName) return d.productName;
+  let name = (d.product || "").replace(/\([^)]*\)/g, "");
+  name = name.replace(/\s*[\d.,]+\s*(kg|g|ml|l|리터|팩|매|개|입|봉|포|구|박스|box)\.?\s*$/i, "");
+  return name.trim() || d.product || "";
+}
+
 // 최근 7일 내 등록된 소분을 상품명 기준으로 집계해 인기 TOP N을 뽑음.
 function topProductsThisWeek(limit = 5) {
   const counts = new Map();
   deals.forEach((d) => {
-    const name = d.productName || d.product; // 옛 글은 productName이 없어서 합성 문자열(product)로 대체
+    const name = baseProductName(d);
     if (!name || daysSince(d.createdAt) > 7) return;
     counts.set(name, (counts.get(name) || 0) + 1);
   });
