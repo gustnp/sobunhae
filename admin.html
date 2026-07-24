@@ -222,7 +222,8 @@ el("#googleLoginBtn").addEventListener("click", async () => {
     await signInWithPopup(auth, new GoogleAuthProvider());
   } catch (err) {
     console.error(err);
-    errEl.textContent = "로그인에 실패했어요. 다시 시도해주세요.";
+    // 원인 파악이 빠르도록 실제 Firebase 에러 코드를 화면에 그대로 보여줌 (팝업 차단/도메인 문제 등 원인이 다양해서)
+    errEl.textContent = `로그인에 실패했어요 (${err.code || err.message || "알 수 없는 오류"}). 다시 시도해주세요.`;
     errEl.style.display = "block";
   }
 });
