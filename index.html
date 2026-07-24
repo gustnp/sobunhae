@@ -943,6 +943,7 @@ function dealCard(d) {
   ) : alreadyIn ? `
     <div class="rounded-lg p-2.5 text-xs font-semibold text-center bg-bg text-accent2">참여 완료 · 남은 자리를 기다리는 중이에요</div>` : `
     <div class="flex flex-col gap-1.5">
+      <p class="text-[10px] text-[#8A8064]">닉네임과 <span class="font-semibold text-[#6E6650]">몇 인분 참여할지</span>를 골라주세요</p>
       <div class="flex gap-2">
         <input class="join-nick input flex-1" placeholder="닉네임" maxlength="12" data-id="${d.id}" />
         <select class="join-units input" style="width:auto; flex-shrink:0;" data-id="${d.id}">${unitOptions}</select>
