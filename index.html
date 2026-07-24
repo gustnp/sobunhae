@@ -130,11 +130,18 @@
       <button id="closeFormBtn" class="text-[#8A8064] text-xl leading-none">&times;</button>
     </div>
     <div class="flex flex-col gap-3" id="formFields">
-      <label class="flex flex-col gap-1">
-        <span class="text-[11px] font-semibold text-[#6E6650]">상품명 *</span>
-        <input id="f_product" list="productSuggestions" placeholder="예: 커클랜드 로티세리 치킨 2팩" class="input" />
-        <datalist id="productSuggestions"></datalist>
-      </label>
+      <div class="flex gap-3">
+        <label class="flex flex-col gap-1 flex-1">
+          <span class="text-[11px] font-semibold text-[#6E6650]">상품명 *</span>
+          <input id="f_product" list="productSuggestions" placeholder="예: 커클랜드 로티세리 치킨" class="input" />
+          <datalist id="productSuggestions"></datalist>
+        </label>
+        <label class="flex flex-col gap-1" style="width:110px; flex-shrink:0;">
+          <span class="text-[11px] font-semibold text-[#6E6650]">용량/무게</span>
+          <input id="f_productSize" placeholder="예: 1.36kg" class="input" />
+        </label>
+      </div>
+      <p class="text-[10px] text-[#8A8064] -mt-1">용량/무게는 상품명과 따로 저장돼서, 같은 상품이 인기 랭킹·키워드 배너에서 중량 차이로 다르게 집계되지 않아요.</p>
       <label class="flex flex-col gap-1">
         <span class="text-[11px] font-semibold text-[#6E6650]">매장 (선택)</span>
         <input id="f_store" placeholder="예: 코스트코 양재점" class="input" />
@@ -440,8 +447,9 @@ function hostTrust(nickname) {
 function topProductsThisWeek(limit = 5) {
   const counts = new Map();
   deals.forEach((d) => {
-    if (!d.product || daysSince(d.createdAt) > 7) return;
-    counts.set(d.product, (counts.get(d.product) || 0) + 1);
+    const name = d.productName || d.product; // 옛 글은 productName이 없어서 합성 문자열(product)로 대체
+    if (!name || daysSince(d.createdAt) > 7) return;
+    counts.set(name, (counts.get(name) || 0) + 1);
   });
   return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
 }
@@ -473,7 +481,7 @@ function renderWatchChips() {
 }
 
 function matchesWatch(d) {
-  const name = (d.product || "").toLowerCase();
+  const name = (d.productName || d.product || "").toLowerCase();
   return watchKeywords.some((k) => name.includes(k.toLowerCase()));
 }
 
@@ -589,13 +597,17 @@ el("#f_photo").addEventListener("change", async (e) => {
 });
 
 el("#submitFormBtn").addEventListener("click", async () => {
-  const product = el("#f_product").value.trim();
+  const productName = el("#f_product").value.trim();
+  const productSize = el("#f_productSize").value.trim();
+  // product는 카드 제목 등 화면 표시용 합성 문자열(예: "로티세리 치킨 2팩"). 인기 랭킹/키워드 배너 같은
+  // 집계는 아래에서 productName만 따로 써서, 중량 차이(1.36kg vs 2kg 등)로 같은 상품이 다르게 잡히지 않게 함.
+  const product = [productName, productSize].filter(Boolean).join(" ");
   const totalPrice = Number(el("#f_price").value);
   const targetCount = Number(el("#f_target").value);
   const nickname = el("#f_nickname").value.trim();
   const errorEl = el("#formError");
 
-  if (!product || !totalPrice || !formLocation || !nickname) {
+  if (!productName || !totalPrice || !formLocation || !nickname) {
     errorEl.textContent = "상품명, 총 가격, 위치(지도에서 검색), 닉네임은 꼭 입력해야 해요.";
     errorEl.classList.remove("hidden"); return;
   }
@@ -610,7 +622,7 @@ el("#submitFormBtn").addEventListener("click", async () => {
   errorEl.classList.add("hidden");
 
   const deal = {
-    product, store: el("#f_store").value.trim(), totalPrice, targetCount, location: formLocation,
+    product, productName, store: el("#f_store").value.trim(), totalPrice, targetCount, location: formLocation,
     tags: selectedTags, meetMethod: el("#f_meet").value, contactLink: el("#f_contact").value.trim(),
     photoUrl: formPhotoUrl || null,
     participants: [{ nickname, units: 1, received: false }], status: "open",
@@ -943,7 +955,7 @@ function dealCard(d) {
 
 // 상품명에 특정 키워드가 포함되면 해당 카드 밑에 추천 배너를 붙임 (첫 매칭 1개만)
 function matchKeywordBanner(d) {
-  const name = (d.product || "").toLowerCase();
+  const name = (d.productName || d.product || "").toLowerCase();
   return keywordBanners.find((b) => name.includes(String(b.keyword).toLowerCase()));
 }
 
@@ -970,7 +982,7 @@ function adSlot() {
 }
 
 function updateProductSuggestions() {
-  const names = [...new Set(deals.map((d) => d.product))].sort();
+  const names = [...new Set(deals.map((d) => d.productName || d.product))].sort();
   el("#productSuggestions").innerHTML = names.map((n) => `<option value="${esc(n)}"></option>`).join("");
 }
 
