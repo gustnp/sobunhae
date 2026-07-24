@@ -234,7 +234,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 import {
   getFirestore, collection, addDoc, onSnapshot, doc, runTransaction,
-  updateDoc, increment, query, orderBy, getDocs, serverTimestamp, arrayUnion,
+  updateDoc, increment, query, orderBy, limit, getDocs, serverTimestamp, arrayUnion,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getStorage, ref as storageRef, uploadBytes, getDownloadURL,
@@ -369,6 +369,29 @@ try {
 } catch (e) {
   console.error("Firebase 초기화 실패:", e);
 }
+
+// ---------- 에러 모니터링: 별도 유료 서비스 없이, 발생한 에러를 Firestore에 남겨서 admin.html에서 확인 ----------
+let lastErrorLogAt = 0;
+function logClientError(message, extra) {
+  if (!firebaseReady || !db) return;
+  const now = Date.now();
+  if (now - lastErrorLogAt < 10000) return; // 세션당 10초에 1건 제한 — 에러 루프가 나도 문서가 폭증하지 않게
+  lastErrorLogAt = now;
+  addDoc(collection(db, "errorLogs"), {
+    message: String(message || "").slice(0, 500),
+    extra: String(extra || "").slice(0, 1000),
+    url: location.href,
+    userAgent: navigator.userAgent.slice(0, 200),
+    createdAt: Date.now(),
+  }).catch(() => {}); // 로깅 자체가 실패해도 조용히 무시 (무한루프 방지)
+}
+window.addEventListener("error", (e) => {
+  logClientError(e.message, e.filename ? `${e.filename}:${e.lineno}` : "");
+});
+window.addEventListener("unhandledrejection", (e) => {
+  const reason = e.reason;
+  logClientError(reason && reason.message ? reason.message : String(reason), reason && reason.stack);
+});
 
 /* ---------- UI 초기 세팅 ---------- */
 el("#statusChips").innerHTML = [
@@ -535,10 +558,15 @@ async function seedIfEmpty() {
   }
 }
 
+let feedPageSize = 30; // 한 번에 다 안 불러오고 페이지 단위로 — 글이 많아져도 초기 로딩/실시간 리스너 비용이 커지지 않게
+let hasMoreDeals = false;
+let dealsUnsub = null;
 function startListening() {
-  const q = query(collection(db, "deals"), orderBy("createdAt", "desc"));
-  onSnapshot(q, (snap) => {
+  if (dealsUnsub) dealsUnsub(); // 페이지 크기 바뀔 때마다 이전 리스너는 정리하고 새로 구독
+  const q = query(collection(db, "deals"), orderBy("createdAt", "desc"), limit(feedPageSize));
+  dealsUnsub = onSnapshot(q, (snap) => {
     deals = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    hasMoreDeals = snap.docs.length >= feedPageSize; // 정확한 총 개수는 아니지만, 꽉 채워 왔으면 더 있을 가능성이 높다고 봄
     render();
   }, (err) => {
     console.error(err);
@@ -546,6 +574,10 @@ function startListening() {
     el("#feedStatus").classList.remove("hidden");
     el("#feed").innerHTML = "";
   });
+}
+function loadMoreDeals() {
+  feedPageSize += 30;
+  startListening();
 }
 
 if (firebaseReady) {
@@ -1149,7 +1181,16 @@ function render() {
       lastKeywordBannerIdx = i;
     }
     return dealCard(d) + kbHtml + (i === 2 ? adSlot() : "");
-  }).join("");
+  }).join("") + (hasMoreDeals ? `
+  <button id="loadMoreBtn" class="rounded-lg py-2.5 text-sm font-semibold text-accent2 border border-kraft bg-white w-full">더 보기</button>` : "");
+
+  if (hasMoreDeals) {
+    el("#loadMoreBtn")?.addEventListener("click", (e) => {
+      e.target.textContent = "불러오는 중...";
+      e.target.disabled = true;
+      loadMoreDeals();
+    });
+  }
 
   feedEl.querySelectorAll(".join-btn").forEach((btn) => btn.addEventListener("click", async () => {
     const id = btn.dataset.id;

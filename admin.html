@@ -132,6 +132,13 @@
       <button id="addKeywordBannerBtn" class="ghost" style="margin-top:12px;">+ 키워드 배너 추가</button>
     </section>
 
+    <section style="background:#fff; border:1.5px solid #D8CFB2; border-radius:12px; padding:16px; margin-bottom:20px;">
+      <p style="font-weight:800; font-size:14px; margin:0 0 4px;">에러 로그 (최근 20건)</p>
+      <p style="font-size:11px; color:#8A8064; margin:0 0 10px;">사용자 브라우저에서 발생한 JS 에러가 자동으로 여기 쌓여요. 별도 모니터링 서비스 없이 최소한의 상황 파악용이에요.</p>
+      <div id="errorLogList" style="display:flex; flex-direction:column; gap:8px;"></div>
+      <p id="errorLogEmpty" style="font-size:12px; color:#8A8064; display:none;">기록된 에러가 없어요.</p>
+    </section>
+
     <div class="toolbar">
       <select id="sortSelect">
         <option value="reports">신고 많은 순</option>
@@ -153,7 +160,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, setDoc, getDoc,
+  getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, limit, setDoc, getDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getStorage, ref as storageRef, uploadBytes, getDownloadURL,
@@ -237,6 +244,34 @@ function startAdminListeners() {
     render();
   }, (err) => {
     el("#list").innerHTML = `<p style="color:#E8542E;">불러오기 실패: ${err.message}</p>`;
+  });
+
+  const errQ = query(collection(db, "errorLogs"), orderBy("createdAt", "desc"), limit(20));
+  onSnapshot(errQ, (snap) => {
+    const listEl = el("#errorLogList");
+    const emptyEl = el("#errorLogEmpty");
+    if (snap.empty) {
+      listEl.innerHTML = "";
+      emptyEl.style.display = "block";
+      return;
+    }
+    emptyEl.style.display = "none";
+    listEl.innerHTML = snap.docs.map((docSnap) => {
+      const d = docSnap.data();
+      const when = d.createdAt ? new Date(d.createdAt).toLocaleString("ko-KR") : "시간 미상";
+      return `
+      <div style="border:1px solid #D8CFB2; border-radius:8px; padding:10px 12px;">
+        <div style="display:flex; justify-content:space-between; gap:8px; align-items:flex-start;">
+          <p style="font-size:12px; font-weight:700; color:#E8542E; margin:0; word-break:break-all;">${(d.message || "").replace(/</g, "&lt;")}</p>
+          <button class="errorLogDeleteBtn ghost" data-id="${docSnap.id}" style="flex-shrink:0; font-size:11px; padding:2px 8px;">지우기</button>
+        </div>
+        <p style="font-size:11px; color:#8A8064; margin:4px 0 0;">${when} · ${(d.url || "").replace(/</g, "&lt;")}</p>
+        ${d.extra ? `<p style="font-size:10px; color:#B9AE8C; margin:2px 0 0; word-break:break-all;">${d.extra.replace(/</g, "&lt;")}</p>` : ""}
+      </div>`;
+    }).join("");
+    listEl.querySelectorAll(".errorLogDeleteBtn").forEach((btn) => {
+      btn.addEventListener("click", () => deleteDoc(doc(db, "errorLogs", btn.dataset.id)));
+    });
   });
 
   onSnapshot(doc(db, "config", "banner"), (snap) => {
