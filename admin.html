@@ -52,15 +52,18 @@
 
 <div id="lockScreen">
   <p style="font-family:'Gothic A1',sans-serif; font-weight:900; font-size:20px; margin:0;">소분해 관리자</p>
-  <input id="pwInput" type="password" placeholder="비밀번호" />
-  <button id="pwSubmit">입장</button>
-  <p id="pwError" style="color:#E8542E; font-size:12px; display:none;">비밀번호가 틀렸어요.</p>
+  <p style="font-size:12px; color:rgba(255,255,255,.6); max-width:260px; text-align:center; margin:0;">관리자로 등록된 구글 계정으로만 들어올 수 있어요.</p>
+  <button id="googleLoginBtn">Google로 로그인</button>
+  <p id="pwError" style="color:#E8542E; font-size:12px; display:none; max-width:260px; text-align:center;"></p>
 </div>
 
 <div id="app" style="display:none;">
-  <header>
-    <h1>소분해 · 관리자</h1>
-    <p>신고 누적, 상태 관리, 삭제 — 이 페이지 주소는 외부에 공유하지 마세요.</p>
+  <header style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+    <div>
+      <h1>소분해 · 관리자</h1>
+      <p>신고 누적, 상태 관리, 삭제 — 이 페이지 주소는 외부에 공유하지 마세요.</p>
+    </div>
+    <button id="logoutBtn" class="ghost" style="color:#fff; border-color:rgba(255,255,255,.3); flex-shrink:0;">로그아웃</button>
   </header>
   <main>
     <section style="background:#fff; border:1.5px solid #D8CFB2; border-radius:12px; padding:16px; margin-bottom:20px;">
@@ -155,9 +158,13 @@ import {
 import {
   getStorage, ref as storageRef, uploadBytes, getDownloadURL,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// 비밀번호를 반드시 바꿔주세요. 이건 실제 보안이 아니라 최소한의 접근 차단입니다.
-const ADMIN_PASSWORD = "sobunhae2026";
+// 실제 권한 검사는 Firestore/Storage 규칙에서 이 이메일 기준으로 걸어야 진짜 보안이 됨.
+// 여기 클라이언트 쪽 체크는 화면 전환용 UX일 뿐, 규칙이 뒷받침 안 하면 우회 가능함.
+const ADMIN_EMAIL = "water8495@gmail.com";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBDmMnZeSK9k6RMfU0uIRDQ8Hbj-HLhYL8",
@@ -181,24 +188,48 @@ let deals = [];
 let sortMode = "reports";
 let statusFilter = "all";
 
-function checkPassword() {
-  const val = el("#pwInput").value;
-  if (val === ADMIN_PASSWORD) {
-    el("#lockScreen").style.display = "none";
-    el("#app").style.display = "block";
-    initFirebase();
-  } else {
-    el("#pwError").style.display = "block";
-  }
-}
-el("#pwSubmit").addEventListener("click", checkPassword);
-el("#pwInput").addEventListener("keydown", (e) => { if (e.key === "Enter") checkPassword(); });
+let db, storage, auth;
+let listenersStarted = false;
 
-let db, storage;
-function initFirebase() {
+function initApp() {
   const app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   storage = getStorage(app);
+  auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    const isAdmin = !!user && user.email === ADMIN_EMAIL;
+    el("#lockScreen").style.display = isAdmin ? "none" : "flex";
+    el("#app").style.display = isAdmin ? "block" : "none";
+    const errEl = el("#pwError");
+    if (user && !isAdmin) {
+      errEl.textContent = `이 구글 계정(${user.email})은 관리자 권한이 없어요. 다른 계정으로 다시 로그인해주세요.`;
+      errEl.style.display = "block";
+    } else {
+      errEl.style.display = "none";
+    }
+    if (isAdmin && !listenersStarted) {
+      listenersStarted = true;
+      startAdminListeners();
+    }
+  });
+}
+initApp();
+
+el("#googleLoginBtn").addEventListener("click", async () => {
+  const errEl = el("#pwError");
+  try {
+    await signInWithPopup(auth, new GoogleAuthProvider());
+  } catch (err) {
+    console.error(err);
+    errEl.textContent = "로그인에 실패했어요. 다시 시도해주세요.";
+    errEl.style.display = "block";
+  }
+});
+
+el("#logoutBtn")?.addEventListener("click", () => signOut(auth));
+
+function startAdminListeners() {
   const q = query(collection(db, "deals"), orderBy("createdAt", "desc"));
   onSnapshot(q, (snap) => {
     deals = snap.docs.map((d) => ({ id: d.id, ...d.data() }));

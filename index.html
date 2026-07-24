@@ -221,11 +221,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 import {
   getFirestore, collection, addDoc, onSnapshot, doc, runTransaction,
-  updateDoc, increment, query, orderBy, getDocs, serverTimestamp,
+  updateDoc, increment, query, orderBy, getDocs, serverTimestamp, arrayUnion,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getStorage, ref as storageRef, uploadBytes, getDownloadURL,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import {
+  getAuth, signInAnonymously, onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBDmMnZeSK9k6RMfU0uIRDQ8Hbj-HLhYL8",
@@ -281,8 +284,9 @@ function safeHref(url) {
   return /^https?:\/\//i.test(s) ? s : "#";
 }
 
-let app, db, analytics, storage, deals = [];
+let app, db, analytics, storage, auth, deals = [];
 let firebaseReady = false;
+let currentUid = null; // 익명 인증 uid. 계정은 아니지만 브라우저/기기 재설치 전까진 유지되는 식별자.
 let statusFilter = "all", tagFilter = "all";
 
 // 관심 키워드 — 계정/푸시 인프라가 없어서 서버 알림은 못 주지만, 재방문했을 때
@@ -344,6 +348,11 @@ try {
   storage = getStorage(app);
   analytics = getAnalytics(app); // 방문자/이용 통계 — Firebase 콘솔 > Analytics 에서 확인
   firebaseReady = true;
+
+  auth = getAuth(app);
+  onAuthStateChanged(auth, (user) => { currentUid = user ? user.uid : null; });
+  // 익명 인증이 아직 콘솔에서 켜지지 않았을 수도 있어서, 실패해도 앱은 그냥 예전처럼(닉네임 기반) 동작하게 둠.
+  signInAnonymously(auth).catch((e) => console.warn("익명 로그인 비활성 상태 — 닉네임 기반 방식으로만 동작합니다:", e.message));
 } catch (e) {
   console.error("Firebase 초기화 실패:", e);
 }
@@ -625,7 +634,8 @@ el("#submitFormBtn").addEventListener("click", async () => {
     product, productName, store: el("#f_store").value.trim(), totalPrice, targetCount, location: formLocation,
     tags: selectedTags, meetMethod: el("#f_meet").value, contactLink: el("#f_contact").value.trim(),
     photoUrl: formPhotoUrl || null,
-    participants: [{ nickname, units: 1, received: false }], status: "open",
+    hostUid: currentUid, // 익명 인증 켜지기 전엔 null — 그래도 글 등록 자체는 그대로 동작함
+    participants: [{ nickname, units: 1, received: false, uid: currentUid }], status: "open",
     createdAt: Date.now(), priceCheckedAt: Date.now(), priceConfirmations: 1,
     reportCount: 0, reviewGood: 0, reviewBad: 0,
   };
@@ -662,7 +672,9 @@ async function joinDeal(id, nickname, units) {
     const remaining = data.targetCount - filled;
     if (remaining <= 0) { result = "full"; return; }
     const take = Math.min(Math.max(1, units), remaining);
-    const participants = [...data.participants, { nickname, units: take, received: false }];
+    // uid는 익명 인증이 켜져 있을 때만 채워짐(currentUid). 아직 콘솔에서 안 켰으면 null로 남고,
+    // 기존처럼 닉네임+localStorage 기반으로만 동작해요 — 뒷단 강제(Firestore 규칙)는 별도로 붙여야 진짜 보호가 됨.
+    const participants = [...data.participants, { nickname, units: take, received: false, uid: currentUid }];
     const newFilled = filled + take;
     tx.update(ref, { participants, status: newFilled >= data.targetCount ? "matched" : "open" });
   });
@@ -690,9 +702,11 @@ async function markReceived(id, nickname) {
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);
     const data = snap.data();
-    const participants = data.participants.map((p) =>
-      p.nickname === nickname ? { ...p, received: true } : p
-    );
+    // uid가 있는 참여자면 uid까지 같이 확인 — 같은 닉네임을 여러 사람이 썼을 때도 더 정확하게 구분됨.
+    const participants = data.participants.map((p) => {
+      const isMatch = p.nickname === nickname && (p.uid ? p.uid === currentUid : true);
+      return isMatch ? { ...p, received: true } : p;
+    });
     const allReceived = participants.every((p) => p.received);
     tx.update(ref, { participants, status: allReceived ? "completed" : data.status });
   });
@@ -707,7 +721,11 @@ async function addReview(id, type) {
   }
   reviewedIds.add(id);
   saveReviewedIds();
-  await updateDoc(doc(db, "deals", id), { [type === "good" ? "reviewGood" : "reviewBad"]: increment(1) });
+  const update = { [type === "good" ? "reviewGood" : "reviewBad"]: increment(1) };
+  // uid가 있으면 같이 기록해둠 — 나중에 Firestore 규칙에서 "한 uid당 한 번만" 강제할 때 쓸 데이터.
+  // 아직 규칙에서 실제로 검사하진 않아서, 지금 당장 중복 방지는 여전히 위 localStorage(reviewedIds)가 담당함.
+  if (currentUid) update.reviewedUids = arrayUnion(currentUid);
+  await updateDoc(doc(db, "deals", id), update);
 }
 
 const reportedIds = new Set();
@@ -715,7 +733,9 @@ async function reportDeal(id) {
   if (reportedIds.has(id)) return;
   if (!confirm("이 소분 글을 신고하시겠어요? (사기, 노쇼, 허위 정보 등)")) return;
   reportedIds.add(id);
-  await updateDoc(doc(db, "deals", id), { reportCount: increment(1) });
+  const update = { reportCount: increment(1) };
+  if (currentUid) update.reportedUids = arrayUnion(currentUid);
+  await updateDoc(doc(db, "deals", id), update);
   alert("신고가 접수됐어요. 검토 후 조치할게요.");
 }
 
