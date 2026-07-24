@@ -193,6 +193,18 @@
         <input id="f_contact" placeholder="오픈채팅 URL" class="input" />
       </label>
       <label class="flex flex-col gap-1">
+        <span class="text-[11px] font-semibold text-[#6E6650]">정산 방식</span>
+        <select id="f_settlement" class="input">
+          <option>물건 받은 후 입금 (권장)</option>
+          <option>입금 먼저 받고 전달</option>
+          <option>만나서 직접 정산</option>
+        </select>
+      </label>
+      <label class="flex flex-col gap-1">
+        <span class="text-[11px] font-semibold text-[#6E6650]">입금 계좌 (모집 완료 후 공개, 선택)</span>
+        <input id="f_bankAccount" placeholder="예: 국민 110-123-456789 홍길동" class="input" />
+      </label>
+      <label class="flex flex-col gap-1">
         <span class="text-[11px] font-semibold text-[#6E6650]">내 닉네임 *</span>
         <input id="f_nickname" placeholder="이 글에서 쓸 닉네임" class="input" />
       </label>
@@ -633,6 +645,7 @@ el("#submitFormBtn").addEventListener("click", async () => {
   const deal = {
     product, productName, store: el("#f_store").value.trim(), totalPrice, targetCount, location: formLocation,
     tags: selectedTags, meetMethod: el("#f_meet").value, contactLink: el("#f_contact").value.trim(),
+    settlementMethod: el("#f_settlement").value, bankAccount: el("#f_bankAccount").value.trim() || null,
     photoUrl: formPhotoUrl || null,
     hostUid: currentUid, // 익명 인증 켜지기 전엔 null — 그래도 글 등록 자체는 그대로 동작함
     participants: [{ nickname, units: 1, received: false, uid: currentUid }], status: "open",
@@ -915,6 +928,15 @@ function dealCard(d) {
       ${d.contactLink
         ? `<a href="${safeHref(d.contactLink)}" target="_blank" rel="noreferrer" class="text-xs underline text-accent2 inline-block">채팅방 참여하기</a>`
         : `<p class="text-xs text-[#6E6650]">작성자가 곧 연락 방법을 공유할 거예요.</p>`}
+      <div class="rounded-lg p-2.5 bg-bg flex flex-col gap-1">
+        <p class="text-xs font-semibold text-ink">정산 방식: ${esc(d.settlementMethod || "협의 필요")}</p>
+        ${d.bankAccount ? `
+        <div class="flex items-center gap-2">
+          <p class="text-xs font-mono text-ink break-all">${esc(d.bankAccount)}</p>
+          <button type="button" class="copy-account-btn text-[10px] font-semibold px-2 py-0.5 rounded-full border border-kraft text-accent2 whitespace-nowrap" data-account="${esc(d.bankAccount)}">복사</button>
+        </div>
+        <p class="text-[10px] text-[#8A8064] leading-relaxed">⚠️ 계좌 정보는 본인 확인 없이 등록돼요. 입금 전 채팅방 등에서 호스트가 맞는지 한 번 더 확인하고, "${esc(d.settlementMethod || "물건 받은 후 입금")}" 방식을 참고해주세요.</p>` : ""}
+      </div>
       <div class="flex flex-wrap gap-1.5">${receiptChecklist}</div>
     </div>` : `
     <div class="rounded-lg p-2.5 text-xs font-semibold text-center bg-bg text-[#8A8064]">인원이 다 찼어요 · 다음 소분을 찾아보세요</div>`
@@ -1139,6 +1161,16 @@ function render() {
   feedEl.querySelectorAll(".mark-received-btn").forEach((btn) => btn.addEventListener("click", () => markReceived(btn.dataset.id, btn.dataset.nickname)));
   feedEl.querySelectorAll(".review-btn").forEach((btn) => btn.addEventListener("click", () => addReview(btn.dataset.id, btn.dataset.type)));
   feedEl.querySelectorAll(".report-btn").forEach((btn) => btn.addEventListener("click", () => reportDeal(btn.dataset.id)));
+  feedEl.querySelectorAll(".copy-account-btn").forEach((btn) => btn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(btn.dataset.account);
+      const original = btn.textContent;
+      btn.textContent = "복사됨";
+      setTimeout(() => { btn.textContent = original; }, 1500);
+    } catch (e) {
+      alert("복사에 실패했어요. 직접 선택해서 복사해주세요.");
+    }
+  }));
   feedEl.querySelectorAll(".host-trust-btn").forEach((btn) => btn.addEventListener("click", () => {
     const detailEl = btn.closest(".participant-row")?.querySelector(".host-detail");
     if (!detailEl) return;
