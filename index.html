@@ -104,8 +104,9 @@
 <div class="max-w-2xl mx-auto px-5 mt-4 flex items-center gap-1.5 flex-wrap">
   <span class="text-xs text-[#8A8064] whitespace-nowrap">⭐ 관심 키워드</span>
   <div id="watchChips" class="flex items-center gap-1.5 flex-wrap"></div>
-  <input id="watchInput" placeholder="키워드 추가 후 Enter" maxlength="12"
+  <input id="watchInput" list="watchSuggestions" placeholder="키워드 추가 후 Enter" maxlength="12"
     class="text-xs outline-none rounded-full px-3 py-1 bg-white border border-kraft" style="width:130px;" />
+  <datalist id="watchSuggestions"></datalist>
 </div>
 
 <!-- 피드 -->
@@ -1037,6 +1038,9 @@ function adSlot() {
 function updateProductSuggestions() {
   const names = [...new Set(deals.map((d) => d.productName || d.product))].sort();
   el("#productSuggestions").innerHTML = names.map((n) => `<option value="${esc(n)}"></option>`).join("");
+  // 관심 키워드는 중량 표기 없이 짧은 상품명으로 추천해야 검색이 잘 걸림
+  const baseNames = [...new Set(deals.map((d) => baseProductName(d)).filter(Boolean))].sort();
+  el("#watchSuggestions").innerHTML = baseNames.map((n) => `<option value="${esc(n)}"></option>`).join("");
 }
 
 function renderBannerSlide() {
