@@ -169,6 +169,14 @@ const firebaseConfig = {
 };
 
 const el = (s) => document.querySelector(s);
+
+// index.html과 동일한 이유 — Firestore 규칙이 열려 있어 누구나 임의 문자열을 넣을 수 있으므로,
+// 관리자 화면이라도 사용자 입력을 innerHTML에 꽂기 전엔 반드시 이스케이프.
+function esc(str) {
+  return String(str ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
 let deals = [];
 let sortMode = "reports";
 let statusFilter = "all";
@@ -442,8 +450,8 @@ function render() {
     <div class="row ${flagged ? "flagged" : ""}">
       <div class="row-top">
         <div>
-          <div class="row-title">${d.product || "(상품명 없음)"}</div>
-          <div class="row-meta">${d.store || "매장 미기재"} · ${location} · ${new Date(d.createdAt).toLocaleString("ko-KR")}</div>
+          <div class="row-title">${esc(d.product) || "(상품명 없음)"}</div>
+          <div class="row-meta">${esc(d.store) || "매장 미기재"} · ${esc(location)} · ${new Date(d.createdAt).toLocaleString("ko-KR")}</div>
         </div>
         <div class="badges">
           ${flagged ? `<span class="badge warn">신고 ${d.reportCount}건</span>` : ""}
