@@ -321,15 +321,47 @@ el("#f_locSearchBtn").addEventListener("click", () => {
 });
 
 /* 데이터 서밋 */
-el("#submitFormBtn").addEventListener("click", async () => {
-  const productName = el("#f_product").value.trim();
-  const totalPrice = Number(el("#f_price").value);
-  const targetCount = Number(el("#f_target").value);
-  const nickname = el("#f_nickname").value.trim();
+/* 이미지 업로드 및 로컬 미리보기 로직 */
+el("#f_photo").addEventListener("click", (e) => { e.target.value = ""; }); // 동일 파일 재선택 방지
+
+el("#f_photo").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  const statusEl = el("#f_photoStatus");
+  const previewEl = el("#f_photoPreview");
   
-  if (!productName || !totalPrice || !formLocation || !nickname) {
-    el("#formError").textContent = "필수 항목을 모두 채워주세요."; el("#formError").classList.remove("hidden"); return;
+  if (!file) return;
+
+  // 1. 로컬 미리보기 렌더링
+  previewEl.src = URL.createObjectURL(file);
+  previewEl.classList.remove("hidden");
+  formPhotoUrl = null;
+
+  if (!storage) {
+    statusEl.textContent = "Firebase Storage 설정이 필요합니다.";
+    statusEl.classList.remove("hidden");
+    return;
   }
+
+  // 2. Firebase Storage 업로드 진행
+  formPhotoUploading = true;
+  statusEl.textContent = "업로드 중...";
+  statusEl.classList.remove("hidden");
+
+  try {
+    const path = `deals/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
+    const fileRef = storageRef(storage, path);
+    // 원본 화질을 유지하되 파일 용량이 클 경우를 대비한 업로드
+    await uploadBytes(fileRef, file, { contentType: file.type });
+    formPhotoUrl = await getDownloadURL(fileRef);
+    statusEl.textContent = "사진 업로드 완료";
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = "업로드에 실패했습니다. Storage 권한 규칙을 확인하세요.";
+    formPhotoUrl = null;
+  } finally {
+    formPhotoUploading = false;
+  }
+});
   
   // [개선] 지연 수집 항목 제외 (기본값 세팅)
   const deal = {
