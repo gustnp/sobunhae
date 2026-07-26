@@ -112,7 +112,7 @@
   <div id="mapView" class="hidden rounded-2xl overflow-hidden border border-kraft h-[460px]"></div>
 </main>
 
-<!-- [개선] 1. 새 소분 등록 모달 (입력 항목 대폭 축소) -->
+<!-- 새 소분 등록 모달 -->
 <div id="formModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(32,40,31,0.6); backdrop-filter: blur(2px);">
   <div class="w-full max-w-md rounded-2xl p-6 max-h-[90vh] overflow-y-auto bg-white shadow-2xl">
     <div class="flex items-center justify-between mb-4">
@@ -143,7 +143,7 @@
       <div class="flex flex-col gap-1">
         <span class="text-xs font-bold text-[#6E6650]">소분 장소 *</span>
         <div class="flex gap-2">
-          <input id="f_locSearch" placeholder="동 이름 검색" class="input flex-1" />
+          <input id="f_locSearch" placeholder="동 이름, 장소 검색" class="input flex-1" />
           <button type="button" id="f_locSearchBtn" class="rounded-xl px-4 text-sm font-bold bg-ink text-white whitespace-nowrap">검색</button>
         </div>
         <div id="f_map" class="w-full h-32 rounded-xl mt-2 hidden"></div>
@@ -164,7 +164,6 @@
       </label>
     </div>
 
-    <!-- 불필요한 결제/계좌/방식 폼 제거 완료 -->
     <p class="text-[11px] mt-4 text-[#8A8064] bg-bg p-3 rounded-lg leading-relaxed">
       상세한 전달 방식이나 계좌 정보는 인원이 모두 모인 후 <strong>채팅방 등에서 협의</strong>하는 것을 권장합니다.
     </p>
@@ -174,7 +173,7 @@
   </div>
 </div>
 
-<!-- [개선] 2. 피드 인라인 입력을 모달로 분리 (시각적 분산 해결) -->
+<!-- 피드 인라인 입력을 대체하는 모달 -->
 <div id="joinModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(32,40,31,0.6); backdrop-filter: blur(2px);">
   <div class="w-full max-w-sm rounded-2xl p-6 bg-white shadow-2xl">
     <div class="flex items-center justify-between mb-4">
@@ -202,7 +201,7 @@ import { getFirestore, collection, addDoc, onSnapshot, doc, runTransaction, upda
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// 파이어베이스 기본 설정 (원본 유지)
+// 파이어베이스 설정
 const firebaseConfig = {
   apiKey: "AIzaSyBDmMnZeSK9k6RMfU0uIRDQ8Hbj-HLhYL8",
   authDomain: "sobunhae.firebaseapp.com",
@@ -268,7 +267,7 @@ document.querySelectorAll(".view-btn").forEach((b) => b.addEventListener("click"
 el("#openFormBtn").addEventListener("click", () => {
   el("#formModal").classList.remove("hidden"); el("#formModal").classList.add("flex");
   
-  // [개선] Geolocation API 활용 위치 자동 입력 편의성 증대
+  // Geolocation 자동 위치 설정
   if (navigator.geolocation && kakaoReady && !formLocation) {
     el("#f_locSearch").placeholder = "현재 위치 확인 중...";
     navigator.geolocation.getCurrentPosition((pos) => {
@@ -277,14 +276,14 @@ el("#openFormBtn").addEventListener("click", () => {
       reverseGeocodeToForm(lat, lng);
       el("#f_locSearch").value = "현재 내 위치 기준";
     }, () => {
-      el("#f_locSearch").placeholder = "동 이름 검색";
+      el("#f_locSearch").placeholder = "동 이름, 장소 검색";
     }, { timeout: 4000 });
   }
 });
 el("#closeFormBtn").addEventListener("click", () => { el("#formModal").classList.add("hidden"); el("#formModal").classList.remove("flex"); });
 el("#closeJoinBtn").addEventListener("click", () => { el("#joinModal").classList.add("hidden"); el("#joinModal").classList.remove("flex"); });
 
-/* 위치 검색 */
+/* [개선 완료] 위치 검색 - 키워드 1순위, 주소 검색 보완 */
 function ensureFormMap(lat, lng) {
   const mapEl = el("#f_map"); mapEl.classList.remove("hidden");
   const center = new kakao.maps.LatLng(lat, lng);
@@ -292,40 +291,65 @@ function ensureFormMap(lat, lng) {
     formMap = new kakao.maps.Map(mapEl, { center, level: 4 });
     formGeocoder = new kakao.maps.services.Geocoder();
     formMarker = new kakao.maps.Marker({ position: center, map: formMap, draggable: true });
-    kakao.maps.event.addListener(formMarker, "dragend", () => { const pos = formMarker.getPosition(); reverseGeocodeToForm(pos.getLat(), pos.getLng()); });
+    
+    kakao.maps.event.addListener(formMarker, "dragend", () => { 
+      const pos = formMarker.getPosition(); 
+      reverseGeocodeToForm(pos.getLat(), pos.getLng()); 
+    });
   } else {
     formMap.relayout(); formMap.setCenter(center); formMarker.setPosition(center);
   }
 }
+
 function reverseGeocodeToForm(lat, lng) {
   formGeocoder.coord2Address(lng, lat, (result, status) => {
     let name = `선택된 위치`;
     if (status === kakao.maps.services.Status.OK && result[0]) {
-      const addr = result[0].address; name = addr.region_3depth_name || addr.region_2depth_name || addr.address_name;
+      const road = result[0].road_address;
+      const addr = result[0].address;
+      name = road ? road.address_name : (addr ? addr.address_name : name);
     }
     formLocation = { name, lat, lng };
-    el("#f_locResult").textContent = `📍 ${name}`; el("#f_locResult").classList.remove("hidden");
+    el("#f_locResult").textContent = `📍 ${name}`; 
+    el("#f_locResult").classList.remove("hidden");
   });
 }
+
 el("#f_locSearchBtn").addEventListener("click", () => {
   const query = el("#f_locSearch").value.trim();
+  const errorEl = el("#f_locError");
   if (!query || !kakaoReady) return;
+  
   const geocoder = new kakao.maps.services.Geocoder();
-  geocoder.addressSearch(query, (res, status) => {
-    if (status === kakao.maps.services.Status.OK) {
-      ensureFormMap(Number(res[0].y), Number(res[0].x)); reverseGeocodeToForm(Number(res[0].y), Number(res[0].x));
+  const places = new kakao.maps.services.Places();
+  errorEl.classList.add("hidden");
+
+  // 1순위 장소명 검색
+  places.keywordSearch(query, (res, status) => {
+    if (status === kakao.maps.services.Status.OK && res[0]) {
+      const lat = Number(res[0].y), lng = Number(res[0].x);
+      ensureFormMap(lat, lng);
+      formLocation = { name: res[0].place_name, lat, lng };
+      el("#f_locResult").textContent = `📍 ${res[0].place_name} (${res[0].address_name})`; 
+      el("#f_locResult").classList.remove("hidden");
     } else {
-      el("#f_locError").textContent = "위치를 찾지 못했어요. (예: 정자동)"; el("#f_locError").classList.remove("hidden");
+      // 2순위 주소 검색
+      geocoder.addressSearch(query, (res2, status2) => {
+        if (status2 === kakao.maps.services.Status.OK && res2[0]) {
+          const lat = Number(res2[0].y), lng = Number(res2[0].x);
+          ensureFormMap(lat, lng);
+          reverseGeocodeToForm(lat, lng);
+        } else {
+          errorEl.textContent = "위치를 찾지 못했어요. 건물명이나 도로명 주소로 다시 검색해보세요."; 
+          errorEl.classList.remove("hidden");
+        }
+      });
     }
   });
 });
 
-/* 데이터 서밋 */
-/* 위치 검색 */
-// (위치 검색 관련 코드는 그대로 유지)
-
 /* 이미지 업로드 및 로컬 미리보기 로직 */
-el("#f_photo").addEventListener("click", (e) => { e.target.value = ""; });
+el("#f_photo").addEventListener("click", (e) => { e.target.value = ""; }); 
 
 el("#f_photo").addEventListener("change", async (e) => {
   const file = e.target.files[0];
@@ -334,7 +358,7 @@ el("#f_photo").addEventListener("change", async (e) => {
   
   if (!file) return;
 
-  // 1. 로컬 미리보기 렌더링
+  // 로컬 렌더링
   previewEl.src = URL.createObjectURL(file);
   previewEl.classList.remove("hidden");
   formPhotoUrl = null;
@@ -345,7 +369,6 @@ el("#f_photo").addEventListener("change", async (e) => {
     return;
   }
 
-  // 2. Firebase Storage 업로드 진행
   formPhotoUploading = true;
   statusEl.textContent = "업로드 중...";
   statusEl.classList.remove("hidden");
@@ -365,7 +388,7 @@ el("#f_photo").addEventListener("change", async (e) => {
   }
 });
 
-/* 데이터 서밋 (이벤트 리스너 및 변수 선언 복구) */
+/* 데이터 서밋 */
 el("#submitFormBtn").addEventListener("click", async () => {
   const productName = el("#f_product").value.trim();
   const totalPrice = Number(el("#f_price").value);
@@ -384,7 +407,6 @@ el("#submitFormBtn").addEventListener("click", async () => {
     return;
   }
   
-  // 지연 수집 항목 제외 (기본값 세팅)
   const deal = {
     product: productName, productName, totalPrice, targetCount, location: formLocation,
     meetMethod: "협의", contactLink: "", settlementMethod: "협의", bankAccount: "", tags: [],
@@ -405,10 +427,7 @@ el("#submitFormBtn").addEventListener("click", async () => {
   }
 });
 
-/* [개선] 1. 쿠팡 파트너스 배너 컴플라이언스 및 네이티브 구조 반영 */
-// (이하 코드는 동일하게 유지)
-
-/* [개선] 1. 쿠팡 파트너스 배너 컴플라이언스 및 네이티브 구조 반영 */
+/* 쿠팡 파트너스 배너 */
 function keywordBannerSlot(keyword, imgUrl, linkUrl) {
   return `
   <a href="${safeHref(linkUrl)}" target="_blank" rel="noopener" class="block rounded-2xl border border-kraft bg-white overflow-hidden shadow-sm hover:shadow-md transition">
@@ -420,16 +439,14 @@ function keywordBannerSlot(keyword, imgUrl, linkUrl) {
         <p class="text-xs text-[#8A8064] mt-1">빠른 배송으로 대용량 상품을 만나보세요.</p>
       </div>
     </div>
-    <!-- 컴플라이언스 준수 필수 문구 삽입 -->
     <div class="bg-gray-50 px-4 py-2 border-t border-kraft">
         <p class="text-[9.5px] text-[#8A8064] text-right">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
     </div>
   </a>`;
 }
 
-/* 카드 렌더링 */
+/* [개선 완료] 카드 렌더링 - 썸네일 이미지 복구 */
 function dealCard(d) {
-  // [개선] 1-2. 네이티브 딜 (데이터베이스에 isCoupangAffiliate가 true일 때 발동)
   if(d.isCoupangAffiliate) {
     const fakeSegs = Array.from({ length: 8 }).map((_, i) => `<div class="division-seg ${i < 6 ? "filled" : ""}"></div>`).join("");
     return `
@@ -453,7 +470,6 @@ function dealCard(d) {
     </div>`;
   }
 
-  // 일반 소분 카드 로직
   const perPerson = d.totalPrice / d.targetCount;
   const filled = filledOf(d);
   const remaining = d.targetCount - filled;
@@ -461,7 +477,6 @@ function dealCard(d) {
   const alreadyIn = !!joinedMap[d.id];
   const segs = Array.from({ length: Math.min(d.targetCount, 12) }).map((_, i) => `<div class="division-seg ${i < filled ? `filled ${matched ? "matched" : ""}` : ""}"></div>`).join("");
   
-  // 상태별 버튼 블록
   const ctaBlock = matched ? (alreadyIn ? 
     `<div class="p-3 bg-bg rounded-xl text-center text-accent2 font-bold text-sm">참여 완료! 호스트의 연락을 기다려주세요.</div>` : 
     `<div class="p-3 bg-gray-100 rounded-xl text-center text-[#8A8064] font-bold text-sm">인원이 마감되었습니다.</div>`
@@ -469,7 +484,6 @@ function dealCard(d) {
     `<div class="p-3 bg-bg rounded-xl text-center text-accent font-bold text-sm">현재 파티에 참여 중입니다.</div>` : 
     `<button class="open-join-btn w-full bg-accent text-white py-3.5 rounded-xl text-base font-bold shadow-md hover:brightness-110 transition" data-id="${d.id}" data-rem="${remaining}">이 소분 참여하기</button>`;
 
-  // [수정] 사진 렌더링 HTML 복구
   const photoHtml = d.photoUrl ? `<img src="${esc(d.photoUrl)}" class="rounded-xl object-cover border border-kraft" style="width:80px; height:80px; flex-shrink:0;" alt="${esc(d.product)}" loading="lazy" />` : "";
 
   return `
@@ -499,6 +513,37 @@ function dealCard(d) {
     </div>
   </div>`;
 }
+
+function render() {
+  const feedEl = el("#feed"), statusEl = el("#feedStatus");
+  const filtered = deals.filter(d => statusFilter === "all" ? true : d.status === statusFilter)
+                        .filter(d => tagFilter === "all" ? true : (d.tags || []).includes(tagFilter));
+
+  if (filtered.length === 0) {
+    feedEl.innerHTML = ""; statusEl.classList.remove("hidden");
+    statusEl.innerHTML = `<p class="text-sm text-[#8A8064]">조건에 맞는 소분이 없어요.</p>`; return;
+  }
+  
+  statusEl.classList.add("hidden");
+  
+  const sampleCoupangDeal = {
+    isCoupangAffiliate: true, product: "크리넥스 3겹 데코앤소프트 30롤", photoUrl: "https://thumbnail8.coupangcdn.com/thumbnails/remote/230x230ex/image/retail/images/2020/07/28/15/4/c12e8412-f198-4c6e-8260-6b6de5fb1178.jpg",
+    totalPrice: 28900, targetCount: 10, affiliateLink: "https://coupa.ng/abcdef"
+  };
+
+  feedEl.innerHTML = filtered.map((d, i) => {
+    let injectAd = (i === 1) ? dealCard(sampleCoupangDeal) : (i === 3) ? keywordBannerSlot('휴지', 'https://via.placeholder.com/72', 'https://coupa.ng/1234') : "";
+    return dealCard(d) + injectAd;
+  }).join("");
+
+  feedEl.querySelectorAll(".open-join-btn").forEach(btn => btn.addEventListener("click", () => {
+    targetJoinDealId = btn.dataset.id;
+    const rem = Number(btn.dataset.rem);
+    el("#j_units").innerHTML = Array.from({length: rem}).map((_,i)=>`<option value="${i+1}">${i+1}인분</option>`).join("");
+    el("#joinModal").classList.remove("hidden"); el("#joinModal").classList.add("flex");
+  }));
+}
+
 /* 참여 확정 모달 로직 */
 el("#submitJoinBtn").addEventListener("click", async () => {
   const nickname = el("#j_nickname").value.trim();
@@ -518,7 +563,6 @@ el("#submitJoinBtn").addEventListener("click", async () => {
   el("#closeJoinBtn").click(); el("#j_nickname").value = "";
 });
 
-// 실시간 구독 리스너 시작
 if(db) {
   onSnapshot(query(collection(db, "deals"), orderBy("createdAt", "desc"), limit(30)), (snap) => {
     deals = snap.docs.map(d => ({id: d.id, ...d.data()})); render();
