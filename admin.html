@@ -181,7 +181,7 @@ import {
   getStorage, ref as storageRef, uploadBytes, getDownloadURL,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 import {
-  getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut,
+  getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // 실제 권한 검사는 Firestore/Storage 규칙에서 이 이메일 기준으로 걸어야 진짜 보안이 됨.
@@ -222,16 +222,10 @@ function initApp() {
   storage = getStorage(app);
   auth = getAuth(app);
 
-  // Safari 등에서 signInWithPopup이 서드파티 스토리지 차단 때문에 sobunhae.firebaseapp.com
-  // 핸들러 단계에서 "The requested action is invalid"로 바로 실패하는 문제가 있어서
-  // 팝업 대신 리다이렉트 방식으로 전환함(구글 로그인 페이지로 이동했다가 다시 이 페이지로 돌아옴).
-  getRedirectResult(auth).catch((err) => {
-    console.error(err);
-    const errEl = el("#pwError");
-    errEl.textContent = `로그인에 실패했어요 (${err.code || err.message || "알 수 없는 오류"}). 다시 시도해주세요.`;
-    errEl.style.display = "block";
-  });
-
+  // 실패 원인은 API 키의 HTTP 리퍼러 제한 목록에 실제 도메인이(마크다운 문법이 섞여 깨진 채로) 빠져있던 것이었음
+  // (identitytoolkit getProjectConfig가 403 -> "Unable to verify that the app domain is authorized").
+  // 그게 진짜 원인이라 팝업/리다이렉트 자체는 문제가 아니었고, 리다이렉트는 오히려 개인정보 보호 모드 등에서
+  // 돌아온 뒤 로그인 상태가 유지 안 되는 문제가 있어서 다시 팝업 방식으로 되돌림.
   onAuthStateChanged(auth, (user) => {
     const isAdmin = !!user && user.email === ADMIN_EMAIL;
     el("#lockScreen").style.display = isAdmin ? "none" : "flex";
@@ -254,7 +248,7 @@ initApp();
 el("#googleLoginBtn").addEventListener("click", async () => {
   const errEl = el("#pwError");
   try {
-    await signInWithRedirect(auth, new GoogleAuthProvider());
+    await signInWithPopup(auth, new GoogleAuthProvider());
   } catch (err) {
     console.error(err);
     // 원인 파악이 빠르도록 실제 Firebase 에러 코드를 화면에 그대로 보여줌 (팝업 차단/도메인 문제 등 원인이 다양해서)
