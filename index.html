@@ -90,7 +90,20 @@
 <header class="bg-ink text-white px-5 pt-7 pb-6">
   <div class="max-w-2xl mx-auto">
     <p style="margin:0 0 8px; font-size:11px; font-weight:700; letter-spacing:.16em; color:rgba(255,255,255,.5);">COSTCO 소분 나눔</p>
-    <h1 class="font-display" style="margin:0; font-size:36px; font-weight:900; line-height:1; letter-spacing:-.035em; display:flex; align-items:flex-end; gap:5px;">소분해<span style="width:7px; height:7px; border-radius:2px; background:#E8542E; margin-bottom:5px;"></span></h1>
+    <!-- 로고 적용: 텍스트와 점 대신 사각형 로고 이미지 직접 구현 -->
+    <h1 class="font-display" style="margin:0; font-size:36px; font-weight:900; line-height:1; letter-spacing:-.035em; display:flex; align-items:center; gap:10px;">
+      <div class="flex flex-col gap-1">
+        <div class="flex gap-1">
+          <span class="w-3.5 h-3.5 rounded-sm bg-white"></span>
+          <span class="w-3.5 h-3.5 rounded-sm bg-white"></span>
+        </div>
+        <div class="flex gap-1">
+          <span class="w-3.5 h-3.5 rounded-sm bg-white"></span>
+          <span class="w-3.5 h-3.5 rounded-sm bg-accent"></span>
+        </div>
+      </div>
+      <span>소분해</span>
+    </h1>
     <p style="margin:10px 0 0; font-size:13px; color:rgba(255,255,255,.72);">코스트코 대용량, 딱 필요한 만큼만</p>
 
     <!-- 관리자가 올린 배너 (있으면 아래 캐러셀 대신 표시) -->
