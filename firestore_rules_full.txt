@@ -1,0 +1,126 @@
+[Firebase 콘솔 > Firestore Database > 규칙 탭 — 지금 있는 내용을 전부 지우고 이걸로 통째로 교체하세요]
+
+기존 대비 바뀐 점 3가지:
+1. `/config/{docId}` 앞에 빠져있던 `match` 키워드 추가 (이거 없으면 문법 오류로 게시 자체가 안 됨).
+2. `bannedNicknames` 컬렉션 규칙 신규 추가 — 원래 없었음. 어드민의 "닉네임 차단 관리" 기능이
+   이 컬렉션을 읽고 쓰는데, 규칙이 없으면 Firestore 기본값(거부)이 적용돼서 그 기능이 지금 조용히
+   실패하고 있었을 가능성이 높음.
+3. `posts` / `posts/{id}/comments` 컬렉션 규칙 신규 추가 — 게시판 기능용. request.auth != null을
+   필수로 해서 로그인 없이 API를 직접 찌르는 공격을 막고, authorUid를 요청자 본인 uid와 강제로
+   일치시켜 글쓴이 사칭을 막음. isAdmin()은 기존에 있던 함수를 그대로 재사용함.
+4. posts의 commentCount update 규칙에 isAdmin() 우회 추가 — 어드민에서 댓글 삭제 시 commentCount를
+   -1(또는 0으로 보정)하는 코드를 새로 넣었는데, 기존 규칙은 +1만 허용해서 운영자도 못 줄이는
+   상태였음.
+5. (다른 스레드 작업 병합) `deals/{dealId}/messages` 서브컬렉션 규칙 신규 추가 — 소분 건별
+   참여자 채팅용. 차단된 닉네임은 exists()로 조회해서 애초에 메시지 생성 자체를 막음.
+   참고: "공지(notice)" 글은 posts의 create 규칙에서 이미 isAdmin()이면 무조건 통과되므로
+   별도 규칙 추가가 필요 없었음 (다른 스레드가 제안한 notice 전용 조건은 이미 커버됨 — 오히려
+   그쪽 제안은 request.auth 필수 조건이 빠져있어서 그대로 쓰면 보안이 약해졌을 것).
+
+---
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == "water8495@gmail.com";
+    }
+
+    match /deals/{dealId} {
+      allow read: if true;
+      allow create: if request.resource.data.product is string
+        && request.resource.data.product.size() > 0 && request.resource.data.product.size() < 100
+        && request.resource.data.totalPrice is number && request.resource.data.totalPrice > 0
+        && request.resource.data.targetCount is number && request.resource.data.targetCount >= 2 && request.resource.data.targetCount <= 12
+        && request.resource.data.participants is list && request.resource.data.participants.size() == 1
+        && request.resource.data.status == "open";
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['participants', 'status', 'reportCount', 'priceCheckedAt', 'priceConfirmations', 'reviewGood', 'reviewBad'])
+        && request.resource.data.product == resource.data.product
+        && request.resource.data.totalPrice == resource.data.totalPrice
+        && request.resource.data.targetCount == resource.data.targetCount
+        && request.resource.data.bankAccount == resource.data.bankAccount
+        && request.resource.data.settlementMethod == resource.data.settlementMethod
+      );
+      allow delete: if isAdmin();
+
+      // 소분 건별 참여자 채팅 (다른 스레드에서 추가한 기능과 병합). 로그인(익명 포함) 필수로 해서
+      // 완전 비인증 스크립트가 도배하는 걸 막고, 차단된 닉네임은 애초에 쓰기 자체가 안 되게 함.
+      match /messages/{messageId} {
+        allow read: if true;
+        allow create: if request.auth != null
+          && request.resource.data.keys().hasAll(['nickname','body','createdAt'])
+          && request.resource.data.nickname is string && request.resource.data.nickname.size() > 0 && request.resource.data.nickname.size() <= 12
+          && request.resource.data.body is string && request.resource.data.body.size() > 0 && request.resource.data.body.size() <= 300
+          && !exists(/databases/$(database)/documents/bannedNicknames/$(request.resource.data.nickname));
+        allow update: if false;
+        allow delete: if isAdmin();
+      }
+    }
+
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /errorLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if request.resource.data.message is string && request.resource.data.message.size() < 600;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    match /bannedNicknames/{nickname} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /posts/{postId} {
+      allow read: if true;
+
+      allow create: if request.auth != null
+        && (
+          isAdmin()
+          || (
+            request.resource.data.keys().hasAll(['type','title','body','authorNickname','authorUid','createdAt','commentCount'])
+            && request.resource.data.type in ['board','errand']
+            && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 60
+            && request.resource.data.body is string && request.resource.data.body.size() > 0 && request.resource.data.body.size() <= 1000
+            && request.resource.data.authorNickname is string && request.resource.data.authorNickname.size() <= 12
+            && request.resource.data.authorUid == request.auth.uid
+            && request.resource.data.commentCount == 0
+          )
+        );
+
+      // 일반 사용자는 댓글 달 때 +1만 가능. 운영자는 댓글 삭제 시 -1(또는 그 외 보정)까지
+      // 자유롭게 할 수 있어야 해서 isAdmin()이면 commentCount 값 제한 없이 통과시킴.
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['commentCount'])
+        && (
+          isAdmin()
+          || request.resource.data.commentCount == resource.data.commentCount + 1
+        );
+
+      allow delete: if isAdmin();
+
+      match /comments/{commentId} {
+        allow read: if true;
+
+        allow create: if request.auth != null
+          && request.resource.data.keys().hasAll(['nickname','body','createdAt'])
+          && request.resource.data.nickname is string && request.resource.data.nickname.size() <= 12
+          && request.resource.data.body is string && request.resource.data.body.size() > 0 && request.resource.data.body.size() <= 200;
+
+        allow update, delete: if isAdmin();
+      }
+    }
+  }
+}
+
+---
+
+배포 후 확인할 것:
+1. 콘솔에서 "게시(Publish)" 눌렀을 때 문법 오류 없이 통과하는지.
+2. admin.html에서 닉네임 차단/차단해제가 실제로 되는지 (이전엔 조용히 실패했을 수 있음).
+3. index.html에서 일반 닉네임으로 글쓰기(3개 미만 후기) → 막히는지, 운영자 로그인 후 글쓰기 → 되는지.
